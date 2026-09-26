@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>NutriCare</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Fix quirk của iOS Safari: các pseudo-class :active/:hover không kích
+      // hoạt khi chạm (tap) trừ khi có ít nhất 1 listener touch* gắn vào
+      // document. Thiếu dòng này, hiệu ứng active:scale-[0.97] (tương đương
+      // Pressable của RN) sẽ hoàn toàn không hiện trên iPhone dù code đúng.
+      document.addEventListener("touchstart", function () {}, true);
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App.js gốc: styles.root = { flex: 1, backgroundColor: COLORS.bg } */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #ecfdf5; /* COLORS.bg — giữ literal vì file này load trước khi Tailwind build tokens */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Khung app mô phỏng khổ điện thoại khi xem trên màn hình rộng, giống cách
+   preview Expo web hiển thị (căn giữa, không kéo giãn full màn hình desktop). */
+#root {
+  max-width: 480px;
+  margin: 0 auto;
+  /* height (không phải min-height): bắt buộc đúng bằng viewport để các con
+     flex-1 + overflow-y-auto bên trong tự cuộn nội bộ, còn BottomNav (sibling
+     cuối, không co giãn) luôn đứng yên ở đáy — giống 1 màn hình điện thoại
+     thật, không phải 1 trang web cuộn dài vô hạn. */
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #ecfdf5;
+  position: relative;
+}
+
+/* Ẩn thanh cuộn trên mọi phần tử cuộn được (list, modal sheet, v.v.) — vẫn
+   cuộn bình thường bằng chạm/lăn chuột, chỉ không vẽ thanh cuộn ra, giống
+   hành vi mặc định của app native (RN không có khái niệm scrollbar). Áp dụng
+   1 lần ở đây cho toàn bộ app thay vì thêm class riêng cho từng màn hình. */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge cũ */
+}
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge (Chromium) */
+}
