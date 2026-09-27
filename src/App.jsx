@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Sparkles, ClipboardList } from "lucide-react";
 import { COLORS } from "./theme/colors";
 import { Toast, Card, EmptyState, Button } from "./components/ui";
@@ -29,6 +29,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useServerData } from "./hooks/useServerData";
 import { useLocalData } from "./hooks/useLocalData";
 import { useAppNavigation } from "./hooks/useAppNavigation";
+import { initAnalytics, trackPageView, trackEvent } from "./lib/analytics";
 
 /**
  * Coordinator duy nhất của app (Dependency Inversion — tương đương App.js gốc):
@@ -60,6 +61,23 @@ export default function App() {
   const userData = useMemo(() => (serverData && localData ? { ...serverData, ...localData } : null), [serverData, localData]);
   const activeTarget = userData?.targets.find((t) => t.isActive);
   const activePlan = userData?.mealPlans.find((p) => p.isActive);
+
+  useEffect(initAnalytics, []);
+
+  // Virtual pageview: URL không đổi khi chuyển tab/overlay (SPA 1 trang), nên
+  // tự suy ra "đường dẫn ảo" từ đúng state đang quyết định renderContent() hiển
+  // thị gì, rồi báo cho GA mỗi khi state đó đổi.
+  useEffect(() => {
+    if (booting) return;
+    let virtualPath = "/auth/" + authScreen;
+    if (user && userData) {
+      if (userData.bmiRecords.length === 0) virtualPath = "/onboarding";
+      else if (nav.overlay) virtualPath = "/" + nav.overlay;
+      else if (nav.tab === "scan" && nav.scanPending) virtualPath = "/scan/result";
+      else virtualPath = "/" + nav.tab;
+    }
+    trackPageView(virtualPath);
+  }, [booting, user, userData, authScreen, nav.tab, nav.overlay, nav.scanPending]);
 
   // --- Onboarding: hồ sơ + BMI đầu tiên (server tự tạo mục tiêu dinh dưỡng đầu tiên) ---
   async function handleOnboardingComplete({ dob, gender, heightCm, weightKg, goalId, activityId }) {
@@ -140,6 +158,7 @@ export default function App() {
     try {
       await planApi.generate(days);
       await reload("mealPlans");
+      trackEvent("plan_created", { days });
       nav.closeOverlay();
       nav.goToTab("plan");
       showToast("Đã cập nhật thực đơn!");
@@ -162,6 +181,7 @@ export default function App() {
     try {
       await planApi.applyDiversification(activePlan.id, selections);
       await reload("mealPlans");
+      trackEvent("plan_ai_diversify_applied");
       nav.closeOverlay();
       nav.goToTab("plan");
       showToast("Đã áp dụng gợi ý AI vào thực đơn!");
@@ -184,6 +204,7 @@ export default function App() {
   async function handleSetPremium(value) {
     try {
       setUser(await (value ? premiumApi.upgrade() : premiumApi.cancel()));
+      trackEvent(value ? "premium_upgraded" : "premium_cancelled");
       nav.closeOverlay();
       showToast(value ? "Chào mừng bạn đến với Premium! 🎉" : "Đã huỷ Premium.");
     } catch (e) {
@@ -197,6 +218,7 @@ export default function App() {
   }
 
   function handleScanSaved() {
+    trackEvent("scan_saved");
     nav.setScanPending(null);
     showToast("Đã lưu vào nhật ký ăn uống!");
     nav.goToTab("home");
