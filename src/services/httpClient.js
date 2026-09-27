@@ -38,8 +38,12 @@ export async function request(method, path, { body, timeoutMs = REQUEST_TIMEOUT_
       body: body === undefined ? undefined : JSON.stringify(body),
       signal: controller.signal,
     });
-  } catch {
-    throw new ApiError(0, `Không kết nối được máy chủ (${API_BASE_URL}). Hãy kiểm tra backend đang chạy và điện thoại cùng mạng Wi-Fi với máy tính.`);
+  } catch (networkErr) {
+    // Chi tiết kỹ thuật (URL backend, lỗi gốc) chỉ để nhà phát triển debug —
+    // KHÔNG đưa vào message của ApiError, vì message này thường được hiển thị
+    // thẳng ra UI (toast, chữ lỗi dưới form...) cho người dùng cuối xem.
+    console.error(`[NutriCare] Không gọi được ${method} ${API_BASE_URL}${path}:`, networkErr);
+    throw new ApiError(0, "Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.");
   } finally {
     clearTimeout(timer);
   }
