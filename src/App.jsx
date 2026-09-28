@@ -23,7 +23,14 @@ import RemindersScreen from "./screens/Reminders/RemindersScreen";
 import PremiumScreen from "./screens/Premium/PremiumScreen";
 import FoodsScreen from "./screens/Foods/FoodsScreen";
 
-import { meApi, bmiApi, targetApi, conditionApi, planApi, premiumApi } from "./services/api";
+import {
+  meApi,
+  bmiApi,
+  targetApi,
+  conditionApi,
+  planApi,
+  premiumApi,
+} from "./services/api";
 import { useToast } from "./hooks/useToast";
 import { useAuth } from "./hooks/useAuth";
 import { useServerData } from "./hooks/useServerData";
@@ -40,12 +47,32 @@ import { initAnalytics, trackPageView, trackEvent } from "./lib/analytics";
  */
 export default function App() {
   const { toast, showToast, reportError } = useToast();
-  const { serverData, loadAll, reload, clear: clearServerData } = useServerData();
-  const { localData, load: loadLocal, clear: clearLocalData, update: updateLocalData, toggleMeal } = useLocalData();
+  const {
+    serverData,
+    loadAll,
+    reload,
+    clear: clearServerData,
+  } = useServerData();
+  const {
+    localData,
+    load: loadLocal,
+    clear: clearLocalData,
+    update: updateLocalData,
+    toggleMeal,
+  } = useLocalData();
   const nav = useAppNavigation();
   const [authScreen, setAuthScreen] = useState("login"); // login | register
 
-  const { booting, user, setUser, login, register, logout, refreshUser, updateProfile } = useAuth({
+  const {
+    booting,
+    user,
+    setUser,
+    login,
+    register,
+    logout,
+    refreshUser,
+    updateProfile,
+  } = useAuth({
     onSessionStart: async (nextUser) => {
       await Promise.all([loadAll(), loadLocal(nextUser.id)]);
     },
@@ -58,7 +85,10 @@ export default function App() {
     onSessionExpired: (msg) => showToast(msg, "warn"),
   });
 
-  const userData = useMemo(() => (serverData && localData ? { ...serverData, ...localData } : null), [serverData, localData]);
+  const userData = useMemo(
+    () => (serverData && localData ? { ...serverData, ...localData } : null),
+    [serverData, localData],
+  );
   const activeTarget = userData?.targets.find((t) => t.isActive);
   const activePlan = userData?.mealPlans.find((p) => p.isActive);
 
@@ -73,14 +103,30 @@ export default function App() {
     if (user && userData) {
       if (userData.bmiRecords.length === 0) virtualPath = "/onboarding";
       else if (nav.overlay) virtualPath = "/" + nav.overlay;
-      else if (nav.tab === "scan" && nav.scanPending) virtualPath = "/scan/result";
+      else if (nav.tab === "scan" && nav.scanPending)
+        virtualPath = "/scan/result";
       else virtualPath = "/" + nav.tab;
     }
     trackPageView(virtualPath);
-  }, [booting, user, userData, authScreen, nav.tab, nav.overlay, nav.scanPending]);
+  }, [
+    booting,
+    user,
+    userData,
+    authScreen,
+    nav.tab,
+    nav.overlay,
+    nav.scanPending,
+  ]);
 
   // --- Onboarding: hồ sơ + BMI đầu tiên (server tự tạo mục tiêu dinh dưỡng đầu tiên) ---
-  async function handleOnboardingComplete({ dob, gender, heightCm, weightKg, goalId, activityId }) {
+  async function handleOnboardingComplete({
+    dob,
+    gender,
+    heightCm,
+    weightKg,
+    goalId,
+    activityId,
+  }) {
     try {
       setUser(await meApi.update({ dob, gender }));
       await bmiApi.create({ heightCm, weightKg, goalId, activityId });
@@ -95,7 +141,8 @@ export default function App() {
   // --- BMI: server quyết định có tạo lại mục tiêu hay không ---
   async function handleAddBMI(payload) {
     try {
-      const { targetRecalculated, decision, target, calorieAdjustment } = await bmiApi.create(payload);
+      const { targetRecalculated, decision, target, calorieAdjustment } =
+        await bmiApi.create(payload);
       await reload("bmiRecords", "targets");
 
       let message = activePlan
@@ -119,7 +166,9 @@ export default function App() {
   // --- Bệnh nền / Dị ứng ---
   async function handleSaveCondition(payload, editingId) {
     try {
-      await (editingId ? conditionApi.update(editingId, payload) : conditionApi.create(payload));
+      await (editingId
+        ? conditionApi.update(editingId, payload)
+        : conditionApi.create(payload));
       await reload("conditions");
       showToast(editingId ? "Đã cập nhật" : "Đã thêm mới");
     } catch (e) {
@@ -144,7 +193,10 @@ export default function App() {
       await reload("targets");
       nav.closeOverlay();
       if (activeTarget && activePlan) {
-        showToast("Đã tạo mục tiêu mới. Vì bạn vừa đổi mục tiêu/hoạt động, hãy xây lại thực đơn để chọn món phù hợp hơn.", "warn");
+        showToast(
+          "Đã tạo mục tiêu mới. Vì bạn vừa đổi mục tiêu/hoạt động, hãy xây lại thực đơn để chọn món phù hợp hơn.",
+          "warn",
+        );
       } else {
         showToast("Đã tạo mục tiêu dinh dưỡng!");
       }
@@ -206,7 +258,9 @@ export default function App() {
       setUser(await (value ? premiumApi.upgrade() : premiumApi.cancel()));
       trackEvent(value ? "premium_upgraded" : "premium_cancelled");
       nav.closeOverlay();
-      showToast(value ? "Chào mừng bạn đến với Premium! 🎉" : "Đã huỷ Premium.");
+      showToast(
+        value ? "Chào mừng bạn đến với Premium! 🎉" : "Đã huỷ Premium.",
+      );
     } catch (e) {
       reportError(e);
     }
@@ -233,7 +287,11 @@ export default function App() {
               icon={Sparkles}
               title="Cần có mục tiêu dinh dưỡng trước"
               desc="Hãy tạo mục tiêu dinh dưỡng ở Trang chủ trước khi xây thực đơn."
-              action={<Button full onPress={() => nav.openOverlay("target-create")}>Tạo mục tiêu ngay</Button>}
+              action={
+                <Button full onPress={() => nav.openOverlay("target-create")}>
+                  Tạo mục tiêu ngay
+                </Button>
+              }
             />
           </Card>
         </div>
@@ -247,7 +305,15 @@ export default function App() {
               icon={ClipboardList}
               title="Chưa có thực đơn"
               desc="Xây dựng thực đơn theo mục tiêu dinh dưỡng hiện tại của bạn."
-              action={<Button full icon={Sparkles} onPress={() => nav.openOverlay("plan-create")}>Tạo thực đơn</Button>}
+              action={
+                <Button
+                  full
+                  icon={Sparkles}
+                  onPress={() => nav.openOverlay("plan-create")}
+                >
+                  Tạo thực đơn
+                </Button>
+              }
             />
           </Card>
         </div>
@@ -268,15 +334,42 @@ export default function App() {
     const close = nav.closeOverlay;
     switch (nav.overlay) {
       case "bmi":
-        return <BMIScreen data={userData} onBack={close} onAddBMI={handleAddBMI} />;
+        return (
+          <BMIScreen data={userData} onBack={close} onAddBMI={handleAddBMI} />
+        );
       case "conditions":
-        return <ConditionsScreen data={userData} onBack={close} onSave={handleSaveCondition} onDelete={handleDeleteCondition} />;
+        return (
+          <ConditionsScreen
+            data={userData}
+            onBack={close}
+            onSave={handleSaveCondition}
+            onDelete={handleDeleteCondition}
+          />
+        );
       case "target-create":
-        return <TargetCreateScreen data={userData} onBack={close} onCreate={handleCreateTarget} />;
+        return (
+          <TargetCreateScreen
+            data={userData}
+            onBack={close}
+            onCreate={handleCreateTarget}
+          />
+        );
       case "target-detail":
-        return <TargetDetailScreen data={userData} onBack={close} onEdit={() => nav.openOverlay("target-create")} />;
+        return (
+          <TargetDetailScreen
+            data={userData}
+            onBack={close}
+            onEdit={() => nav.openOverlay("target-create")}
+          />
+        );
       case "plan-create":
-        return <PlanCreateScreen data={userData} onBack={close} onCreate={handleCreatePlan} />;
+        return (
+          <PlanCreateScreen
+            data={userData}
+            onBack={close}
+            onCreate={handleCreatePlan}
+          />
+        );
       case "plan-diversify":
         return (
           <PlanDiversifyScreen
@@ -291,9 +384,21 @@ export default function App() {
       case "plan-history":
         return <PlanHistoryScreen data={userData} onBack={close} />;
       case "premium":
-        return <PremiumScreen user={user} onBack={close} onSetPremium={handleSetPremium} />;
+        return (
+          <PremiumScreen
+            user={user}
+            onBack={close}
+            onSetPremium={handleSetPremium}
+          />
+        );
       case "reminders":
-        return <RemindersScreen reminders={userData.reminders} onBack={close} onSave={(reminders) => updateLocalData(user.id, { reminders })} />;
+        return (
+          <RemindersScreen
+            reminders={userData.reminders}
+            onBack={close}
+            onSave={(reminders) => updateLocalData(user.id, { reminders })}
+          />
+        );
       default:
         return null;
     }
@@ -309,13 +414,24 @@ export default function App() {
     }
     if (!user || !userData) {
       return authScreen === "login" ? (
-        <LoginScreen onLogin={login} onGoRegister={() => setAuthScreen("register")} />
+        <LoginScreen
+          onLogin={login}
+          onGoRegister={() => setAuthScreen("register")}
+        />
       ) : (
-        <RegisterScreen onRegister={register} onGoLogin={() => setAuthScreen("login")} />
+        <RegisterScreen
+          onRegister={register}
+          onGoLogin={() => setAuthScreen("login")}
+        />
       );
     }
     if (userData.bmiRecords.length === 0) {
-      return <OnboardingScreen fullName={user.fullName} onComplete={handleOnboardingComplete} />;
+      return (
+        <OnboardingScreen
+          fullName={user.fullName}
+          onComplete={handleOnboardingComplete}
+        />
+      );
     }
     if (nav.overlay) return renderOverlay();
 
@@ -327,11 +443,17 @@ export default function App() {
               user={user}
               userData={userData}
               onQuickAction={nav.handleQuickAction}
-              onToggleMeal={(dk, mealSlot, planId) => toggleMeal(user.id, dk, mealSlot, planId)}
+              onToggleMeal={(dk, mealSlot, planId) =>
+                toggleMeal(user.id, dk, mealSlot, planId)
+              }
             />
           )}
           {nav.tab === "scan" && !nav.scanPending && (
-            <ScanScreen mealSlot="trua" onAnalyzed={handleScanAnalyzed} onCancel={() => nav.goToTab("home")} />
+            <ScanScreen
+              mealSlot="trua"
+              onAnalyzed={handleScanAnalyzed}
+              onCancel={() => nav.goToTab("home")}
+            />
           )}
           {nav.tab === "scan" && nav.scanPending && (
             <ScanResultScreen
@@ -345,7 +467,13 @@ export default function App() {
           {nav.tab === "foods" && <FoodsScreen />}
           {nav.tab === "plan" && renderPlanTab()}
           {nav.tab === "profile" && (
-            <ProfileScreen user={user} data={userData} onLogout={logout} onGoTo={nav.handleQuickAction} onUpdateProfile={handleUpdateProfile} />
+            <ProfileScreen
+              user={user}
+              data={userData}
+              onLogout={logout}
+              onGoTo={nav.handleQuickAction}
+              onUpdateProfile={handleUpdateProfile}
+            />
           )}
         </div>
         <BottomNav active={nav.tab} onChange={nav.goToTab} />
@@ -354,7 +482,10 @@ export default function App() {
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
+    <div
+      className="h-full flex flex-col"
+      style={{ backgroundColor: COLORS.bg }}
+    >
       {renderContent()}
       <Toast toast={toast} />
     </div>

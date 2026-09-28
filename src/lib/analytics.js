@@ -33,9 +33,8 @@ export function initAnalytics() {
 export function trackPageView(virtualPath, title) {
   if (!MEASUREMENT_ID || typeof window.gtag !== "function") return;
   window.gtag("event", "page_view", {
-    page_title: title,
-    page_path: virtualPath,
-    page_location: window.location.href,
+    page_location: window.location.origin + virtualPath,
+    page_title: title || virtualPath,
   });
 }
 
