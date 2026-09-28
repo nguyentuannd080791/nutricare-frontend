@@ -42,6 +42,11 @@ export default {
           "sans-serif",
         ],
       },
+      zIndex: {
+        actionBar: "40",
+        overlay: "50",
+        toast: "60",
+      },
       maxWidth: {
         app: "480px", // khung điện thoại mô phỏng khi xem trên màn hình rộng
       },

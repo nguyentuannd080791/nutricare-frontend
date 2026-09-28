@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, ChevronDown, CheckCircle2, AlertTriangle, XCircle, X, ArrowLeft } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  ChevronDown,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  X,
+  ArrowLeft,
+} from "lucide-react";
 import { COLORS } from "../theme/colors";
 
 /**
@@ -10,11 +19,21 @@ import { COLORS } from "../theme/colors";
  * Mọi con số (bo góc, khoảng cách, cỡ chữ) giữ nguyên giá trị px từ StyleSheet gốc.
  */
 
-export function IconBadge({ icon: Icon, bg = COLORS.muted, color = COLORS.primary, size = 40 }) {
+export function IconBadge({
+  icon: Icon,
+  bg = COLORS.muted,
+  color = COLORS.primary,
+  size = 40,
+}) {
   return (
     <div
       className="flex items-center justify-center shrink-0"
-      style={{ width: size, height: size, borderRadius: size * 0.4, backgroundColor: bg }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.4,
+        backgroundColor: bg,
+      }}
     >
       <Icon size={size * 0.5} color={color} strokeWidth={2} />
     </div>
@@ -30,7 +49,17 @@ const BUTTON_VARIANTS = {
   accent: "bg-accent text-white",
 };
 
-export function Button({ children, onPress, variant = "primary", disabled, busy, icon: Icon, full, style, className }) {
+export function Button({
+  children,
+  onPress,
+  variant = "primary",
+  disabled,
+  busy,
+  icon: Icon,
+  full,
+  style,
+  className,
+}) {
   const isDisabled = disabled || busy;
   return (
     <button
@@ -43,7 +72,9 @@ export function Button({ children, onPress, variant = "primary", disabled, busy,
         "text-[15px] font-bold transition-transform duration-100",
         BUTTON_VARIANTS[variant],
         full ? "w-full" : "",
-        isDisabled ? "opacity-50 cursor-not-allowed" : "active:scale-[0.97] cursor-pointer",
+        isDisabled
+          ? "opacity-50 cursor-not-allowed"
+          : "active:scale-[0.97] cursor-pointer",
         className || "",
       ].join(" ")}
     >
@@ -66,29 +97,50 @@ export function Card({ children, onPress, style, className }) {
   const content = (
     <div
       style={style}
-      className={["rounded-2xl bg-card border border-border", className || ""].join(" ")}
+      className={[
+        "rounded-2xl bg-card border border-border",
+        className || "",
+      ].join(" ")}
     >
       {children}
     </div>
   );
   if (!onPress) return content;
   return (
-    <button type="button" onClick={onPress} className="text-left w-full active:scale-[0.97] transition-transform duration-100">
+    <button
+      type="button"
+      onClick={onPress}
+      className="text-left w-full active:scale-[0.97] transition-transform duration-100"
+    >
       {content}
     </button>
   );
 }
 
-export function TextField({ label, error, icon: Icon, secure, style, className, ...props }) {
+export function TextField({
+  label,
+  error,
+  icon: Icon,
+  secure,
+  style,
+  className,
+  ...props
+}) {
   const [show, setShow] = useState(false);
   return (
     <div className="w-full">
-      {label ? <span className="block text-[13px] font-semibold text-fg mb-[6px]">{label}</span> : null}
+      {label ? (
+        <span className="block text-[13px] font-semibold text-fg mb-[6px]">
+          {label}
+        </span>
+      ) : null}
       <div
         className="relative flex flex-row items-center rounded-[12px] border-[1.5px] bg-white"
         style={{ borderColor: error ? COLORS.destructive : "#000000" }}
       >
-        {Icon ? <Icon size={18} color="#94A3B8" className="ml-[14px] shrink-0" /> : null}
+        {Icon ? (
+          <Icon size={18} color="#94A3B8" className="ml-[14px] shrink-0" />
+        ) : null}
         <input
           {...props}
           type={secure ? (show ? "text" : "password") : props.type || "text"}
@@ -111,34 +163,63 @@ export function TextField({ label, error, icon: Icon, secure, style, className, 
             className="absolute right-[14px] flex items-center justify-center"
             aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           >
-            {show ? <EyeOff size={18} color="#94A3B8" /> : <Eye size={18} color="#94A3B8" />}
+            {show ? (
+              <EyeOff size={18} color="#94A3B8" />
+            ) : (
+              <Eye size={18} color="#94A3B8" />
+            )}
           </button>
         ) : null}
       </div>
-      {error ? <span className="block text-[12px] mt-[4px] text-destructive font-medium">{error}</span> : null}
+      {error ? (
+        <span className="block text-[12px] mt-[4px] text-destructive font-medium">
+          {error}
+        </span>
+      ) : null}
     </div>
   );
 }
 
 /** Picker dạng bottom-sheet — giữ đúng hành vi bản RN (thay cho <select> gốc trình duyệt). */
-export function SelectField({ label, value, onChange, options, placeholder, error }) {
+export function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+}) {
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.id === value);
   return (
     <div className="w-full">
-      {label ? <span className="block text-[13px] font-semibold text-fg mb-[6px]">{label}</span> : null}
+      {label ? (
+        <span className="block text-[13px] font-semibold text-fg mb-[6px]">
+          {label}
+        </span>
+      ) : null}
       <button
         type="button"
         onClick={() => setOpen(true)}
         className="w-full flex flex-row items-center justify-between rounded-[12px] border-[1.5px] bg-white py-[13px] px-[14px]"
         style={{ borderColor: error ? COLORS.destructive : "#000000" }}
       >
-        <span className={selected ? "text-fg text-[15px]" : "text-placeholderGray text-[15px]"}>
+        <span
+          className={
+            selected
+              ? "text-fg text-[15px]"
+              : "text-placeholderGray text-[15px]"
+          }
+        >
           {selected ? selected.label : placeholder || "Chọn"}
         </span>
         <ChevronDown size={16} color="#94A3B8" />
       </button>
-      {error ? <span className="block text-[12px] mt-[4px] text-destructive font-medium">{error}</span> : null}
+      {error ? (
+        <span className="block text-[12px] mt-[4px] text-destructive font-medium">
+          {error}
+        </span>
+      ) : null}
 
       {open ? (
         <Overlay onClose={() => setOpen(false)}>
@@ -153,7 +234,11 @@ export function SelectField({ label, value, onChange, options, placeholder, erro
                 }}
                 className="w-full text-left py-[14px] px-6"
               >
-                <span className={`text-[15px] text-fg ${o.id === value ? "font-bold" : "font-normal"}`}>{o.label}</span>
+                <span
+                  className={`text-[15px] text-fg ${o.id === value ? "font-bold" : "font-normal"}`}
+                >
+                  {o.label}
+                </span>
               </button>
             ))}
           </div>
@@ -173,7 +258,10 @@ const BADGE_TONES = {
 export function Badge({ children, tone = "muted", textColor }) {
   return (
     <span
-      className={["inline-block self-start rounded-full px-[10px] py-[4px] text-[12px] font-semibold", BADGE_TONES[tone]].join(" ")}
+      className={[
+        "inline-block self-start rounded-full px-[10px] py-[4px] text-[12px] font-semibold",
+        BADGE_TONES[tone],
+      ].join(" ")}
       style={textColor ? { color: textColor } : undefined}
     >
       {children}
@@ -186,8 +274,12 @@ export function EmptyState({ icon: Icon, title, desc, action }) {
     <div className="flex flex-col items-center py-10 px-6 text-center">
       <IconBadge icon={Icon} size={64} />
       <span className="mt-4 text-[16px] font-bold text-fg">{title}</span>
-      <span className="mt-[6px] text-[13.5px] text-descGray leading-[19px] max-w-[280px]">{desc}</span>
-      {action ? <div className="mt-5 w-full max-w-[220px]">{action}</div> : null}
+      <span className="mt-[6px] text-[13.5px] text-descGray leading-[19px] max-w-[280px]">
+        {desc}
+      </span>
+      {action ? (
+        <div className="mt-5 w-full max-w-[220px]">{action}</div>
+      ) : null}
     </div>
   );
 }
@@ -197,7 +289,12 @@ export function ScreenHeader({ title, onBack, right }) {
     <div className="flex flex-row items-center justify-between px-5 pt-5 pb-3">
       <div className="flex flex-row items-center gap-[10px]">
         {onBack ? (
-          <button type="button" onClick={onBack} className="p-1 -ml-1" aria-label="Quay lại">
+          <button
+            type="button"
+            onClick={onBack}
+            className="p-1 -ml-1"
+            aria-label="Quay lại"
+          >
             <ArrowLeft size={22} color={COLORS.fg} />
           </button>
         ) : null}
@@ -217,13 +314,15 @@ export function Toast({ toast }) {
     error: { bg: COLORS.destructive, Icon: XCircle },
   }[tone];
   return (
-    <div className="fixed top-4 left-0 right-0 flex justify-center z-[60] pointer-events-none">
+    <div className="fixed top-4 left-0 right-0 flex justify-center z-toast pointer-events-none">
       <div
         className="flex flex-row items-start gap-[10px] rounded-2xl px-4 py-3 max-w-[92%] shadow-lg"
         style={{ backgroundColor: conf.bg }}
       >
         <conf.Icon size={18} color="#fff" className="shrink-0 mt-[1px]" />
-        <span className="flex-1 text-white text-[13.5px] font-medium">{toast.message}</span>
+        <span className="flex-1 text-white text-[13.5px] font-medium">
+          {toast.message}
+        </span>
       </div>
     </div>
   );
@@ -231,7 +330,7 @@ export function Toast({ toast }) {
 
 export function FixedActionBar({ children }) {
   return (
-    <div className="fixed left-0 right-0 bottom-0 p-4 pb-7 bg-white border-t border-border z-[100] mx-auto max-w-app">
+    <div className="fixed left-0 right-0 bottom-0 p-4 pb-7 bg-white border-t border-border z-actionBar mx-auto max-w-app">
       {children}
     </div>
   );
@@ -239,17 +338,24 @@ export function FixedActionBar({ children }) {
 
 export function RadioCard({ selected, title, desc, onPress }) {
   return (
-    <Card onPress={onPress} className={`mb-2 ${selected ? "!border-primary !bg-muted" : ""}`}>
+    <Card
+      onPress={onPress}
+      className={`mb-2 ${selected ? "!border-primary !bg-muted" : ""}`}
+    >
       <div className="flex flex-row items-center gap-3 p-[14px]">
         <div
           className="flex items-center justify-center shrink-0 w-5 h-5 rounded-full border-2"
           style={{ borderColor: selected ? COLORS.primary : COLORS.border }}
         >
-          {selected ? <div className="w-[10px] h-[10px] rounded-full bg-primary" /> : null}
+          {selected ? (
+            <div className="w-[10px] h-[10px] rounded-full bg-primary" />
+          ) : null}
         </div>
         <div className="flex-1 text-left">
           <div className="text-[14px] font-bold text-fg">{title}</div>
-          {desc ? <div className="text-[12px] text-descGray mt-[1px]">{desc}</div> : null}
+          {desc ? (
+            <div className="text-[12px] text-descGray mt-[1px]">{desc}</div>
+          ) : null}
         </div>
       </div>
     </Card>
@@ -259,7 +365,10 @@ export function RadioCard({ selected, title, desc, onPress }) {
 /** Overlay dùng chung cho SelectField + ModalSheet: nền mờ + đóng khi bấm ra ngoài. */
 function Overlay({ onClose, children }) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black/40 flex items-end justify-center z-overlay"
+      onClick={onClose}
+    >
       <div className="w-full max-w-app" onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
@@ -274,7 +383,12 @@ export function ModalSheet({ open, onClose, title, children }) {
       <div className="bg-white rounded-t-[28px] p-5 max-h-[88%] overflow-y-auto z-10">
         <div className="flex flex-row items-center justify-between mb-4">
           <span className="text-[17px] font-bold text-fg">{title}</span>
-          <button type="button" onClick={onClose} className="p-[6px] rounded-full bg-muted" aria-label="Đóng">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-[6px] rounded-full bg-muted"
+            aria-label="Đóng"
+          >
             <X size={16} color={COLORS.fg} />
           </button>
         </div>
