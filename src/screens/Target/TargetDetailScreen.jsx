@@ -23,6 +23,9 @@ export default function TargetDetailScreen({ data, onBack, onEdit }) {
           <div className="flex flex-row gap-2 mt-[10px]">
             <span className="rounded-full px-[10px] py-[5px] text-[12px] font-semibold text-white" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>{goal?.label}</span>
             <span className="rounded-full px-[10px] py-[5px] text-[12px] font-semibold text-white" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>{activity?.label}</span>
+            {active.targetWeightKg != null && (
+              <span className="rounded-full px-[10px] py-[5px] text-[12px] font-semibold text-white" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>Đích {active.targetWeightKg}kg · {active.durationMonths} tháng</span>
+            )}
           </div>
           <div className="flex flex-row gap-2 mt-4">
             {[["Đạm", `${active.protein}g`], ["Tinh bột", `${active.carb}g`], ["Béo", `${active.fat}g`]].map(([label, value]) => (

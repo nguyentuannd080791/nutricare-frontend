@@ -124,12 +124,11 @@ export default function App() {
     gender,
     heightCm,
     weightKg,
-    goalId,
-    activityId,
+    ...goal // goalId, activityId (+ targetChangeKg, durationMonths khi giảm/tăng cân)
   }) {
     try {
       setUser(await meApi.update({ dob, gender }));
-      await bmiApi.create({ heightCm, weightKg, goalId, activityId });
+      await bmiApi.create({ heightCm, weightKg, ...goal });
       await reload("bmiRecords", "targets");
       showToast("Đã tạo mục tiêu dinh dưỡng đầu tiên của bạn!");
       return null;

@@ -3,7 +3,14 @@ import { Card } from "../../../components/ui";
 
 /** Trách nhiệm duy nhất: hiển thị kết quả ước tính kcal/macro mỗi ngày. */
 export default function GoalPreviewCard({ preview }) {
+  const isWeightGoal = preview.targetWeightKg != null;
   const items = [
+    ...(isWeightGoal
+      ? [
+          { label: "Cân nặng mục tiêu", value: `${preview.targetWeightKg} kg` },
+          { label: preview.dailyKcalDelta < 0 ? "Thâm hụt mỗi ngày" : "Thặng dư mỗi ngày", value: `${Math.abs(preview.dailyKcalDelta)} kcal` },
+        ]
+      : []),
     { label: "Calo", value: `${preview.calories} kcal` },
     { label: "Đạm (protein)", value: `${preview.protein} g` },
     { label: "Tinh bột", value: `${preview.carb} g` },

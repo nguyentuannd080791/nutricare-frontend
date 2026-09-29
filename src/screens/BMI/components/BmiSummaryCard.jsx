@@ -31,13 +31,14 @@ export default function BmiSummaryCard({ last, prev }) {
           <Badge tone="muted" textColor={info.color}>{info.label}</Badge>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-[12.5px] text-descGray">{last.heightCm}cm · {last.weightKg}kg</span>
+          <span className="text-[12.5px] text-descGray">{last.weightKg}kg</span>
           <div className="flex flex-row items-center gap-1 mt-1">
             <TrendIcon size={13} color={trendColor} />
             <span className="text-[11.5px] font-semibold" style={{ color: trendColor }}>{trendText}</span>
           </div>
         </div>
       </div>
+      <span className="block text-[11.5px] text-placeholderGray mt-3">Chiều cao: {last.heightCm}cm (khai báo một lần, không thay đổi)</span>
     </Card>
   );
 }

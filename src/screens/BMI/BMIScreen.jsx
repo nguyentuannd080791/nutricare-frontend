@@ -19,7 +19,7 @@ export default function BMIScreen({ data, onBack, onAddBMI }) {
       </div>
 
       <FixedActionBar>
-        <Button full icon={Plus} onPress={() => setModalOpen(true)}>Thêm chỉ số mới</Button>
+        <Button full icon={Plus} onPress={() => setModalOpen(true)}>Cập nhật cân nặng</Button>
       </FixedActionBar>
 
       <AddBmiModal open={modalOpen} onClose={() => setModalOpen(false)} onSubmit={(payload) => { onAddBMI(payload); setModalOpen(false); }} />
