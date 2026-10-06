@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, ClipboardList } from "lucide-react";
 import { Toast, Card, EmptyState, Button } from "./components/ui";
 import AppLayout from "./layouts/AppLayout";
@@ -29,7 +29,11 @@ import {
   conditionApi,
   planApi,
   premiumApi,
+  mealLogApi,
 } from "./services/api";
+import { cycleIndexForDate } from "./domain/planCycle";
+import { mergeServerLogs } from "./domain/mealProgress";
+import AdminDashboardScreen from "./screens/Admin/AdminDashboardScreen";
 import { useToast } from "./hooks/useToast";
 import { useAuth } from "./hooks/useAuth";
 import { useServerData } from "./hooks/useServerData";
@@ -73,7 +77,8 @@ export default function App() {
     updateProfile,
   } = useAuth({
     onSessionStart: async (nextUser) => {
-      await Promise.all([loadAll(), loadLocal(nextUser.id)]);
+      const [, local] = await Promise.all([loadAll(), loadLocal(nextUser.id)]);
+      syncMealLogs(nextUser.id, local); // không chặn đăng nhập: lỗi mạng thì app vẫn chạy với tiến độ trên máy
     },
     onSessionEnd: () => {
       clearServerData();
@@ -84,12 +89,48 @@ export default function App() {
     onSessionExpired: (msg) => showToast(msg, "warn"),
   });
 
+  // Kéo các bữa đã ăn từ server (đánh dấu trên thiết bị khác) về tiến độ trên máy.
+  async function syncMealLogs(userId, local) {
+    try {
+      const logs = await mealLogApi.list();
+      updateLocalData(userId, { progress: mergeServerLogs(local.progress, logs) });
+    } catch {
+      /* bỏ qua: lần mở app sau sẽ đồng bộ lại */
+    }
+  }
+
   const userData = useMemo(
     () => (serverData && localData ? { ...serverData, ...localData } : null),
     [serverData, localData],
   );
   const activeTarget = userData?.targets.find((t) => t.isActive);
   const activePlan = userData?.mealPlans.find((p) => p.isActive);
+
+  // Chống bấm đúp: khoá theo (ngày, bữa) bằng ref để không dính stale closure.
+  const mealSyncInFlight = useRef(new Set());
+
+  // Tick "đã ăn": cập nhật ngay trên máy (lạc quan) rồi gửi server đối chiếu với
+  // thực đơn; server từ chối hoặc mất mạng thì hoàn tác và báo lỗi.
+  async function handleToggleMeal(dateKeyStr, mealSlot, planId) {
+    const guardKey = `${dateKeyStr}|${mealSlot}`;
+    const plan = userData.mealPlans.find((p) => p.id === planId);
+    if (!plan || mealSyncInFlight.current.has(guardKey)) return;
+
+    const entry = userData.progress[dateKeyStr];
+    const eaten = !(entry?.planId === planId && entry[mealSlot]);
+    const cycleIdx = cycleIndexForDate(plan, dateKeyStr);
+
+    mealSyncInFlight.current.add(guardKey);
+    toggleMeal(user.id, dateKeyStr, mealSlot, planId);
+    try {
+      await mealLogApi.set({ planId, date: dateKeyStr, dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1, mealSlot, eaten });
+    } catch (e) {
+      toggleMeal(user.id, dateKeyStr, mealSlot, planId);
+      reportError(e);
+    } finally {
+      mealSyncInFlight.current.delete(guardKey);
+    }
+  }
 
   // Khai báo TRƯỚC effect pageview bên dưới: React chạy effect theo thứ tự khai
   // báo, nên lượt xem trang đầu tiên sau khi khôi phục phiên đã mang user_id.
@@ -401,6 +442,8 @@ export default function App() {
             onSave={(reminders) => updateLocalData(user.id, { reminders })}
           />
         );
+      case "admin-dashboard":
+        return <AdminDashboardScreen onBack={close} />;
       default:
         return null;
     }
@@ -444,9 +487,7 @@ export default function App() {
               user={user}
               userData={userData}
               onQuickAction={nav.handleQuickAction}
-              onToggleMeal={(dk, mealSlot, planId) =>
-                toggleMeal(user.id, dk, mealSlot, planId)
-              }
+              onToggleMeal={handleToggleMeal}
             />
           )}
           {nav.tab === "scan" && !nav.scanPending && (

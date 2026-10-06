@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Section from "./Section";
-import SegmentedControl from "./SegmentedControl";
+import SegmentedControl from "../../../components/SegmentedControl";
 import { FEATURES, FEATURE_FILTERS } from "../content";
 
 function FeatureCard({ feature: { icon: Icon, tier, title, desc } }) {

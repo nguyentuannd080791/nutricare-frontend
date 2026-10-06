@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
 import Section from "./Section";
-import SegmentedControl from "./SegmentedControl";
+import SegmentedControl from "../../../components/SegmentedControl";
 import CtaLink from "./CtaLink";
 import { FREE_PLAN, PRO_PLAN } from "../content";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Scale, ShieldCheck, Flame, History, Crown, Bell, ChevronRight } from "lucide-react";
+import { Scale, ShieldCheck, Flame, History, Crown, Bell, ChevronRight, BarChart3 } from "lucide-react";
 import { Card, IconBadge } from "../../../components/ui";
 import { classifyBMI } from "../../../domain/bmi";
 import { GOALS } from "../../../domain/constants";
@@ -17,6 +17,8 @@ export default function ProfileMenuList({ user, data, onGoTo }) {
     { id: "plan-history", label: "Lịch sử thực đơn", icon: History, sub: planCount > 0 ? `${planCount} thực đơn đã tạo` : "Chưa có thực đơn nào" },
     { id: "premium", label: "Nâng cấp Premium", icon: Crown, sub: user.isPremium ? "Đang là hội viên" : "120.000đ/tháng · 990.000đ/năm" },
     { id: "reminders", label: "Nhắc nhở", icon: Bell },
+    // Quyền do backend quyết định (ADMIN_EMAILS); cờ này chỉ để ẩn/hiện lối vào.
+    ...(user.isAdmin ? [{ id: "admin-dashboard", label: "Thống kê quản trị", icon: BarChart3, sub: "Người dùng mới, thực đơn, tỉ lệ hoàn thành" }] : []),
   ];
 
   return (
