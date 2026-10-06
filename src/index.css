@@ -16,21 +16,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Khung app mô phỏng khổ điện thoại khi xem trên màn hình rộng, giống cách
-   preview Expo web hiển thị (căn giữa, không kéo giãn full màn hình desktop). */
-#root {
-  max-width: 480px;
-  margin: 0 auto;
-  /* height (không phải min-height): bắt buộc đúng bằng viewport để các con
-     flex-1 + overflow-y-auto bên trong tự cuộn nội bộ, còn BottomNav (sibling
-     cuối, không co giãn) luôn đứng yên ở đáy — giống 1 màn hình điện thoại
-     thật, không phải 1 trang web cuộn dài vô hạn. */
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background-color: #ecfdf5;
-  position: relative;
+/* Khung điện thoại / layout máy tính nằm ở src/layouts (MobileLayout,
+   DesktopLayout) để trang giới thiệu "/" cuộn như 1 trang web bình thường. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Ẩn thanh cuộn trên mọi phần tử cuộn được (list, modal sheet, v.v.) — vẫn

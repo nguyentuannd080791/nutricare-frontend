@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Sparkles, ClipboardList } from "lucide-react";
-import { COLORS } from "./theme/colors";
 import { Toast, Card, EmptyState, Button } from "./components/ui";
-import BottomNav from "./navigation/BottomNav";
+import AppLayout from "./layouts/AppLayout";
 
 import LoginScreen from "./screens/Auth/LoginScreen";
 import RegisterScreen from "./screens/Auth/RegisterScreen";
@@ -36,7 +35,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useServerData } from "./hooks/useServerData";
 import { useLocalData } from "./hooks/useLocalData";
 import { useAppNavigation } from "./hooks/useAppNavigation";
-import { initAnalytics, trackPageView, trackEvent } from "./lib/analytics";
+import { setAnalyticsUser, trackPageView, trackEvent } from "./lib/analytics";
 
 /**
  * Coordinator duy nhất của app (Dependency Inversion — tương đương App.js gốc):
@@ -92,7 +91,11 @@ export default function App() {
   const activeTarget = userData?.targets.find((t) => t.isActive);
   const activePlan = userData?.mealPlans.find((p) => p.isActive);
 
-  useEffect(initAnalytics, []);
+  // Khai báo TRƯỚC effect pageview bên dưới: React chạy effect theo thứ tự khai
+  // báo, nên lượt xem trang đầu tiên sau khi khôi phục phiên đã mang user_id.
+  useEffect(() => {
+    setAnalyticsUser(user?.id ?? null);
+  }, [user?.id]);
 
   // Virtual pageview: URL không đổi khi chuyển tab/overlay (SPA 1 trang), nên
   // tự suy ra "đường dẫn ảo" từ đúng state đang quyết định renderContent() hiển
@@ -435,7 +438,6 @@ export default function App() {
     if (nav.overlay) return renderOverlay();
 
     return (
-      <>
         <div className="flex-1 flex flex-col min-h-0">
           {nav.tab === "home" && (
             <HomeScreen
@@ -475,18 +477,28 @@ export default function App() {
             />
           )}
         </div>
-        <BottomNav active={nav.tab} onChange={nav.goToTab} />
-      </>
     );
   }
 
+  // Đã đăng nhập + xong onboarding mới có thanh điều hướng chính.
+  const isInApp = Boolean(user && userData && userData.bmiRecords.length > 0);
+  const navigation = isInApp
+    ? {
+        active: nav.tab,
+        // Trên máy tính Sidebar còn hiện khi đang mở overlay: chọn mục = đóng overlay rồi chuyển tab.
+        onChange: (tab) => {
+          nav.closeOverlay();
+          nav.goToTab(tab);
+        },
+      }
+    : null;
+
   return (
-    <div
-      className="h-full flex flex-col"
-      style={{ backgroundColor: COLORS.bg }}
-    >
-      {renderContent()}
+    <>
+      <AppLayout navigation={navigation} hideMobileNav={Boolean(nav.overlay)}>
+        {renderContent()}
+      </AppLayout>
       <Toast toast={toast} />
-    </div>
+    </>
   );
 }

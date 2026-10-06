@@ -29,6 +29,16 @@ export function initAnalytics() {
   window.gtag("config", MEASUREMENT_ID, { send_page_view: false });
 }
 
+// Gắn User-ID của NutriCare (UUID do backend cấp, KHÔNG phải email/tên — GA cấm
+// dữ liệu định danh cá nhân) vào mọi event/pageview từ giờ trở đi. Nhờ đó GA4
+// nhận ra cùng 1 người quay lại, kể cả khi đổi thiết bị/trình duyệt. Truyền
+// null khi đăng xuất để các lượt xem sau đó quay về ẩn danh.
+// Lưu ý: bật báo cáo User-ID ở GA4 Admin > Reporting identity (Blended/Observed).
+export function setAnalyticsUser(userId) {
+  if (!MEASUREMENT_ID || typeof window.gtag !== "function") return;
+  window.gtag("set", { user_id: userId ?? null });
+}
+
 // Gọi mỗi khi "màn hình ảo" đổi (đổi tab ở BottomNav, mở/đóng overlay).
 export function trackPageView(virtualPath, title) {
   if (!MEASUREMENT_ID || typeof window.gtag !== "function") return;

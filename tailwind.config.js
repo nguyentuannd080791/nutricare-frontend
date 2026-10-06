@@ -31,6 +31,7 @@ export default {
         dark: "#0F172A",
       },
       fontFamily: {
+        landing: ["Be Vietnam Pro", "Inter", "system-ui", "sans-serif"],
         sans: [
           "Inter",
           "-apple-system",

@@ -1,13 +1,6 @@
 import React from "react";
-import { Home, Utensils, ClipboardList, User } from "lucide-react";
 import { COLORS } from "../theme/colors";
-
-const TABS = [
-  { id: "home", label: "Trang chủ", icon: Home },
-  { id: "foods", label: "Thực phẩm", icon: Utensils },
-  { id: "plan", label: "Kế hoạch", icon: ClipboardList },
-  { id: "profile", label: "Cá nhân", icon: User },
-];
+import { NAV_TABS } from "./tabs";
 
 // paddingBottom: 24 (iOS, chừa tai thỏ) vs 14 (Android) trong bản gốc -> trên
 // web dùng env(safe-area-inset-bottom) để tự thích ứng với mọi thiết bị.
@@ -17,7 +10,7 @@ export default function BottomNav({ active, onChange }) {
       className="w-full flex flex-row border-t border-border bg-white pt-[10px] shadow-[0_-2px_4px_rgba(0,0,0,0.05)] mx-auto max-w-app shrink-0"
       style={{ paddingBottom: "max(14px, env(safe-area-inset-bottom, 14px))" }}
     >
-      {TABS.map((t) => {
+      {NAV_TABS.map((t) => {
         const isActive = active === t.id;
         const Icon = t.icon;
         return (
