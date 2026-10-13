@@ -34,6 +34,7 @@ import {
 import { cycleIndexForDate } from "./domain/planCycle";
 import { mergeServerLogs } from "./domain/mealProgress";
 import AdminDashboardScreen from "./screens/Admin/AdminDashboardScreen";
+import ExerciseScreen from "./screens/Exercise/ExerciseScreen";
 import { useToast } from "./hooks/useToast";
 import { useAuth } from "./hooks/useAuth";
 import { useServerData } from "./hooks/useServerData";
@@ -93,7 +94,9 @@ export default function App() {
   async function syncMealLogs(userId, local) {
     try {
       const logs = await mealLogApi.list();
-      updateLocalData(userId, { progress: mergeServerLogs(local.progress, logs) });
+      updateLocalData(userId, {
+        progress: mergeServerLogs(local.progress, logs),
+      });
     } catch {
       /* bỏ qua: lần mở app sau sẽ đồng bộ lại */
     }
@@ -108,6 +111,7 @@ export default function App() {
 
   // Chống bấm đúp: khoá theo (ngày, bữa) bằng ref để không dính stale closure.
   const mealSyncInFlight = useRef(new Set());
+  const [mealSyncVersion, setMealSyncVersion] = useState(0);
 
   // Tick "đã ăn": cập nhật ngay trên máy (lạc quan) rồi gửi server đối chiếu với
   // thực đơn; server từ chối hoặc mất mạng thì hoàn tác và báo lỗi.
@@ -123,12 +127,19 @@ export default function App() {
     mealSyncInFlight.current.add(guardKey);
     toggleMeal(user.id, dateKeyStr, mealSlot, planId);
     try {
-      await mealLogApi.set({ planId, date: dateKeyStr, dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1, mealSlot, eaten });
+      await mealLogApi.set({
+        planId,
+        date: dateKeyStr,
+        dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1,
+        mealSlot,
+        eaten,
+      });
     } catch (e) {
       toggleMeal(user.id, dateKeyStr, mealSlot, planId);
       reportError(e);
     } finally {
       mealSyncInFlight.current.delete(guardKey);
+      setMealSyncVersion((version) => version + 1);
     }
   }
 
@@ -442,6 +453,14 @@ export default function App() {
             onSave={(reminders) => updateLocalData(user.id, { reminders })}
           />
         );
+      case "exercise":
+        return (
+          <ExerciseScreen
+            onBack={close}
+            showToast={showToast}
+            reportError={reportError}
+          />
+        );
       case "admin-dashboard":
         return <AdminDashboardScreen onBack={close} />;
       default:
@@ -481,43 +500,44 @@ export default function App() {
     if (nav.overlay) return renderOverlay();
 
     return (
-        <div className="flex-1 flex flex-col min-h-0">
-          {nav.tab === "home" && (
-            <HomeScreen
-              user={user}
-              userData={userData}
-              onQuickAction={nav.handleQuickAction}
-              onToggleMeal={handleToggleMeal}
-            />
-          )}
-          {nav.tab === "scan" && !nav.scanPending && (
-            <ScanScreen
-              mealSlot="trua"
-              onAnalyzed={handleScanAnalyzed}
-              onCancel={() => nav.goToTab("home")}
-            />
-          )}
-          {nav.tab === "scan" && nav.scanPending && (
-            <ScanResultScreen
-              scanId={nav.scanPending.scanId}
-              photoUri={nav.scanPending.photoUri}
-              result={nav.scanPending.result}
-              onDone={handleScanSaved}
-              onRetry={() => nav.setScanPending(null)}
-            />
-          )}
-          {nav.tab === "foods" && <FoodsScreen />}
-          {nav.tab === "plan" && renderPlanTab()}
-          {nav.tab === "profile" && (
-            <ProfileScreen
-              user={user}
-              data={userData}
-              onLogout={logout}
-              onGoTo={nav.handleQuickAction}
-              onUpdateProfile={handleUpdateProfile}
-            />
-          )}
-        </div>
+      <div className="flex-1 flex flex-col min-h-0">
+        {nav.tab === "home" && (
+          <HomeScreen
+            user={user}
+            userData={userData}
+            onQuickAction={nav.handleQuickAction}
+            mealSyncVersion={mealSyncVersion}
+            onToggleMeal={handleToggleMeal}
+          />
+        )}
+        {nav.tab === "scan" && !nav.scanPending && (
+          <ScanScreen
+            mealSlot="trua"
+            onAnalyzed={handleScanAnalyzed}
+            onCancel={() => nav.goToTab("home")}
+          />
+        )}
+        {nav.tab === "scan" && nav.scanPending && (
+          <ScanResultScreen
+            scanId={nav.scanPending.scanId}
+            photoUri={nav.scanPending.photoUri}
+            result={nav.scanPending.result}
+            onDone={handleScanSaved}
+            onRetry={() => nav.setScanPending(null)}
+          />
+        )}
+        {nav.tab === "foods" && <FoodsScreen />}
+        {nav.tab === "plan" && renderPlanTab()}
+        {nav.tab === "profile" && (
+          <ProfileScreen
+            user={user}
+            data={userData}
+            onLogout={logout}
+            onGoTo={nav.handleQuickAction}
+            onUpdateProfile={handleUpdateProfile}
+          />
+        )}
+      </div>
     );
   }
 

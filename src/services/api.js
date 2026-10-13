@@ -22,14 +22,16 @@ export const bmiApi = {
 
 export const targetApi = {
   list: () => request("GET", "/nutrition-targets"),
-  preview: (payload) => request("POST", "/nutrition-targets/preview", { body: payload }),
+  preview: (payload) =>
+    request("POST", "/nutrition-targets/preview", { body: payload }),
   create: (payload) => request("POST", "/nutrition-targets", { body: payload }),
 };
 
 export const conditionApi = {
   list: () => request("GET", "/health-conditions"),
   create: (payload) => request("POST", "/health-conditions", { body: payload }),
-  update: (id, payload) => request("PUT", `/health-conditions/${id}`, { body: payload }),
+  update: (id, payload) =>
+    request("PUT", `/health-conditions/${id}`, { body: payload }),
   remove: (id) => request("DELETE", `/health-conditions/${id}`),
 };
 
@@ -37,8 +39,13 @@ export const planApi = {
   history: () => request("GET", "/plan/history"),
   generate: (days) => request("POST", "/plan/generate", { body: { days } }),
   swap: (payload) => request("POST", "/plan/swap", { body: payload }),
-  diversify: (planId) => request("POST", "/plan/diversify", { body: { planId }, timeoutMs: AI_TIMEOUT_MS }),
-  applyDiversification: (planId, selections) => request("POST", "/plan/diversify/apply", { body: { planId, selections } }),
+  diversify: (planId) =>
+    request("POST", "/plan/diversify", {
+      body: { planId },
+      timeoutMs: AI_TIMEOUT_MS,
+    }),
+  applyDiversification: (planId, selections) =>
+    request("POST", "/plan/diversify/apply", { body: { planId, selections } }),
 };
 
 export const dishApi = {
@@ -64,7 +71,11 @@ export const rawFoodApi = {
 };
 
 export const scanApi = {
-  analyze: (imageBase64, mealSlot) => request("POST", "/scan/analyze", { body: { imageBase64, mealSlot }, timeoutMs: AI_TIMEOUT_MS }),
+  analyze: (imageBase64, mealSlot) =>
+    request("POST", "/scan/analyze", {
+      body: { imageBase64, mealSlot },
+      timeoutMs: AI_TIMEOUT_MS,
+    }),
 };
 
 export const premiumApi = {
@@ -82,4 +93,15 @@ export const mealLogApi = {
 // Chỉ tài khoản có email trong ADMIN_EMAILS của backend mới gọi được (403 nếu không).
 export const adminApi = {
   stats: (days) => request("GET", `/admin/stats?days=${days}`),
+};
+
+export const exerciseApi = {
+  catalog: () => request("GET", "/exercises"),
+  list: (date) => request("GET", `/exercise-logs?date=${date}`),
+  add: (payload) => request("POST", "/exercise-logs", { body: payload }),
+  remove: (id) => request("DELETE", `/exercise-logs/${id}`),
+};
+
+export const dailySummaryApi = {
+  get: (date) => request("GET", `/daily-summary?date=${date}`),
 };

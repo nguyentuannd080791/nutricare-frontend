@@ -1,11 +1,12 @@
 import React from "react";
-import { ShieldCheck, Search, Bell } from "lucide-react";
+import { ShieldCheck, Search, Bell, Dumbbell } from "lucide-react";
 import { IconBadge } from "../../../components/ui";
 
 const QUICK_ACTIONS = [
   { id: "conditions", label: "Bệnh nền", icon: ShieldCheck },
   { id: "foods", label: "Tra món ăn", icon: Search },
   { id: "reminders", label: "Nhắc nhở", icon: Bell },
+  { id: "exercise", label: "Bài tập", icon: Dumbbell },
 ];
 
 /** Trách nhiệm duy nhất: lưới truy cập nhanh trên Trang chủ. */

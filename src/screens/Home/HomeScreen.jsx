@@ -7,13 +7,14 @@ import { dateKey, cycleIndexForDate } from "../../domain/planCycle";
 import GreetingHeader from "./components/GreetingHeader";
 import StatCards from "./components/StatCards";
 import TodayPlanCard from "./components/TodayPlanCard";
+import TodayCalorieCard from "./components/TodayCalorieCard";
 import QuickActionsGrid from "./components/QuickActionsGrid";
 
 /**
  * Điều phối các phần nhỏ (GreetingHeader/StatCards/TodayPlanCard/QuickActionsGrid).
  * Tính toán số liệu hiển thị ở đây; mỗi subcomponent chỉ lo hiển thị phần của nó (SRP).
  */
-export default function HomeScreen({ user, userData, onQuickAction, onToggleMeal }) {
+export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAction, onToggleMeal }) {
   const latestBMI = userData.bmiRecords[0];
   const activeTarget = userData.targets.find((t) => t.isActive);
   const activePlan = userData.mealPlans.find((p) => p.isActive);
@@ -75,6 +76,10 @@ export default function HomeScreen({ user, userData, onQuickAction, onToggleMeal
             />
           )}
         </Card>
+      )}
+
+      {activeTarget && (
+        <TodayCalorieCard refreshKey={mealSyncVersion} onOpenExercise={() => onQuickAction("exercise")} />
       )}
 
       <QuickActionsGrid onQuickAction={onQuickAction} />
