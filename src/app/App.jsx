@@ -1,0 +1,618 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles, ClipboardList } from "lucide-react";
+import { Toast, Card, EmptyState, Button } from "../shared/components/ui";
+import AppLayout from "./layout/AppLayout";
+
+import LoginScreen from "../modules/auth/pages/LoginScreen";
+import RegisterScreen from "../modules/auth/pages/RegisterScreen";
+import OnboardingScreen from "../modules/onboarding/pages/OnboardingScreen";
+import HomeScreen from "../modules/home/pages/HomeScreen";
+import ScanScreen from "../modules/scan/pages/ScanScreen";
+import ScanResultScreen from "../modules/scan/pages/ScanResultScreen";
+import BMIScreen from "../modules/bmi/pages/BMIScreen";
+import ConditionsScreen from "../modules/conditions/pages/ConditionsScreen";
+import TargetCreateScreen from "../modules/target/pages/TargetCreateScreen";
+import TargetDetailScreen from "../modules/target/pages/TargetDetailScreen";
+import PlanCreateScreen from "../modules/plan/pages/PlanCreateScreen";
+import PlanViewScreen from "../modules/plan/pages/PlanViewScreen";
+import PlanDiversifyScreen from "../modules/plan/pages/PlanDiversifyScreen";
+import PlanHistoryScreen from "../modules/plan/pages/PlanHistoryScreen";
+import ProfileScreen from "../modules/profile/pages/ProfileScreen";
+import RemindersScreen from "../modules/reminders/pages/RemindersScreen";
+import PremiumScreen from "../modules/premium/pages/PremiumScreen";
+import FoodsScreen from "../modules/foods/pages/FoodsScreen";
+
+import { meApi } from "../modules/profile/api/meApi";
+import { bmiApi } from "../modules/bmi/api/bmiApi";
+import { targetApi } from "../modules/target/api/targetApi";
+import { conditionApi } from "../modules/conditions/api/conditionApi";
+import { planApi } from "../modules/plan/api/planApi";
+import { premiumApi } from "../modules/premium/api/premiumApi";
+import { mealLogApi } from "../modules/plan/api/mealLogApi";
+import { cycleIndexForDate } from "../shared/domain/planCycle";
+import { mergeServerLogs } from "../modules/plan/domain/mealProgress";
+import { NAV_TABS, ADMIN_TABS } from "./navigation/tabs";
+import AdminDashboardScreen from "../modules/admin/pages/AdminDashboardScreen";
+import AdminUsersScreen from "../modules/admin/pages/AdminUsersScreen";
+import ExerciseScreen from "../modules/exercise/pages/ExerciseScreen";
+import { useToast } from "./hooks/useToast";
+import { useAuth } from "../modules/auth/hooks/useAuth";
+import { useServerData } from "./hooks/useServerData";
+import { useLocalData } from "./hooks/useLocalData";
+import { useAppNavigation } from "./hooks/useAppNavigation";
+import { setAnalyticsUser, trackPageView, trackEvent } from "../lib/analytics";
+
+/**
+ * Coordinator duy nhất của app (Dependency Inversion — tương đương App.js gốc):
+ * nối các hook trách nhiệm-đơn (auth/serverData/localData/toast/navigation)
+ * lại với nhau và điều phối luồng dữ liệu giữa chúng + các màn hình. Bản thân
+ * App.jsx không tự chứa logic phức tạp — chỉ orchestration + các handler mỏng
+ * gọi thẳng service API rồi reload đúng phần dữ liệu bị ảnh hưởng.
+ */
+export default function App() {
+  const { toast, showToast, reportError } = useToast();
+  const {
+    serverData,
+    loadAll,
+    reload,
+    clear: clearServerData,
+  } = useServerData();
+  const {
+    localData,
+    load: loadLocal,
+    clear: clearLocalData,
+    update: updateLocalData,
+    toggleMeal,
+  } = useLocalData();
+  const nav = useAppNavigation();
+  const [authScreen, setAuthScreen] = useState("login"); // login | register
+
+  const {
+    booting,
+    user,
+    setUser,
+    login,
+    register,
+    logout,
+    refreshUser,
+    updateProfile,
+  } = useAuth({
+    onSessionStart: async (nextUser) => {
+      if (nextUser.isAdmin) {
+        nav.goToTab("admin-dashboard");
+      }
+      const [, local] = await Promise.all([loadAll(), loadLocal(nextUser.id)]);
+      syncMealLogs(nextUser.id, local); // không chặn đăng nhập: lỗi mạng thì app vẫn chạy với tiến độ trên máy
+    },
+    onSessionEnd: () => {
+      clearServerData();
+      clearLocalData();
+      setAuthScreen("login");
+      nav.reset();
+    },
+    onSessionExpired: (msg) => showToast(msg, "warn"),
+  });
+
+  // Kéo các bữa đã ăn từ server (đánh dấu trên thiết bị khác) về tiến độ trên máy.
+  async function syncMealLogs(userId, local) {
+    try {
+      const logs = await mealLogApi.list();
+      updateLocalData(userId, {
+        progress: mergeServerLogs(local.progress, logs),
+      });
+    } catch {
+      /* bỏ qua: lần mở app sau sẽ đồng bộ lại */
+    }
+  }
+
+  const userData = useMemo(
+    () => (serverData && localData ? { ...serverData, ...localData } : null),
+    [serverData, localData],
+  );
+  const activeTarget = userData?.targets.find((t) => t.isActive);
+  const activePlan = userData?.mealPlans.find((p) => p.isActive);
+
+  // Chống bấm đúp: khoá theo (ngày, bữa) bằng ref để không dính stale closure.
+  const mealSyncInFlight = useRef(new Set());
+  const [mealSyncVersion, setMealSyncVersion] = useState(0);
+
+  // Tick "đã ăn": cập nhật ngay trên máy (lạc quan) rồi gửi server đối chiếu với
+  // thực đơn; server từ chối hoặc mất mạng thì hoàn tác và báo lỗi.
+  async function handleToggleMeal(dateKeyStr, mealSlot, planId) {
+    const guardKey = `${dateKeyStr}|${mealSlot}`;
+    const plan = userData.mealPlans.find((p) => p.id === planId);
+    if (!plan || mealSyncInFlight.current.has(guardKey)) return;
+
+    const entry = userData.progress[dateKeyStr];
+    const eaten = !(entry?.planId === planId && entry[mealSlot]);
+    const cycleIdx = cycleIndexForDate(plan, dateKeyStr);
+
+    mealSyncInFlight.current.add(guardKey);
+    toggleMeal(user.id, dateKeyStr, mealSlot, planId);
+    try {
+      await mealLogApi.set({
+        planId,
+        date: dateKeyStr,
+        dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1,
+        mealSlot,
+        eaten,
+      });
+    } catch (e) {
+      toggleMeal(user.id, dateKeyStr, mealSlot, planId);
+      reportError(e);
+    } finally {
+      mealSyncInFlight.current.delete(guardKey);
+      setMealSyncVersion((version) => version + 1);
+    }
+  }
+
+  // Khai báo TRƯỚC effect pageview bên dưới: React chạy effect theo thứ tự khai
+  // báo, nên lượt xem trang đầu tiên sau khi khôi phục phiên đã mang user_id.
+  useEffect(() => {
+    setAnalyticsUser(user?.id ?? null);
+  }, [user?.id]);
+
+  // Virtual pageview: URL không đổi khi chuyển tab/overlay (SPA 1 trang), nên
+  // tự suy ra "đường dẫn ảo" từ đúng state đang quyết định renderContent() hiển
+  // thị gì, rồi báo cho GA mỗi khi state đó đổi.
+  useEffect(() => {
+    if (booting) return;
+    let virtualPath = "/auth/" + authScreen;
+    if (user && userData) {
+      if (userData.bmiRecords.length === 0) virtualPath = "/onboarding";
+      else if (nav.overlay) virtualPath = "/" + nav.overlay;
+      else if (nav.tab === "scan" && nav.scanPending)
+        virtualPath = "/scan/result";
+      else virtualPath = "/" + nav.tab;
+    }
+    trackPageView(virtualPath);
+  }, [
+    booting,
+    user,
+    userData,
+    authScreen,
+    nav.tab,
+    nav.overlay,
+    nav.scanPending,
+  ]);
+
+  // --- Onboarding: hồ sơ + BMI đầu tiên (server tự tạo mục tiêu dinh dưỡng đầu tiên) ---
+  async function handleOnboardingComplete({
+    dob,
+    gender,
+    heightCm,
+    weightKg,
+    ...goal // goalId, activityId (+ targetChangeKg, durationMonths khi giảm/tăng cân)
+  }) {
+    try {
+      setUser(await meApi.update({ dob, gender }));
+      await bmiApi.create({ heightCm, weightKg, ...goal });
+      await reload("bmiRecords", "targets");
+      showToast("Đã tạo mục tiêu dinh dưỡng đầu tiên của bạn!");
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  // --- BMI: server quyết định có tạo lại mục tiêu hay không ---
+  async function handleAddBMI(payload) {
+    try {
+      const { targetRecalculated, decision, target, calorieAdjustment } =
+        await bmiApi.create(payload);
+      await reload("bmiRecords", "targets");
+
+      let message = activePlan
+        ? "Đã lưu chỉ số mới. Thay đổi chưa đủ ngưỡng nên mục tiêu & thực đơn hiện tại vẫn giữ nguyên."
+        : "Đã lưu chỉ số BMI mới.";
+      let tone = "success";
+      if (targetRecalculated) {
+        message = `Cân nặng thay đổi ${decision.pctChange?.toFixed(1)}% — mục tiêu dinh dưỡng đã cập nhật còn ${target.calories} kcal/ngày.${activePlan ? " Hãy xây lại thực đơn để khớp mục tiêu mới." : ""}`;
+        tone = "warn";
+      }
+      if (calorieAdjustment !== 0) {
+        message += ` Vòng lặp phản hồi Premium: cân nặng 7 ngày qua chưa khớp mục tiêu, đã tự động ${calorieAdjustment > 0 ? "tăng" : "giảm"} ${Math.abs(calorieAdjustment)} kcal.`;
+        tone = "warn";
+      }
+      showToast(message, tone);
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  // --- Bệnh nền / Dị ứng ---
+  async function handleSaveCondition(payload, editingId) {
+    try {
+      await (editingId
+        ? conditionApi.update(editingId, payload)
+        : conditionApi.create(payload));
+      await reload("conditions");
+      showToast(editingId ? "Đã cập nhật" : "Đã thêm mới");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  async function handleDeleteCondition(id) {
+    try {
+      await conditionApi.remove(id);
+      await reload("conditions");
+      showToast("Đã xoá");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  // --- Mục tiêu dinh dưỡng ---
+  async function handleCreateTarget(payload) {
+    try {
+      await targetApi.create(payload);
+      await reload("targets");
+      nav.closeOverlay();
+      if (activeTarget && activePlan) {
+        showToast(
+          "Đã tạo mục tiêu mới. Vì bạn vừa đổi mục tiêu/hoạt động, hãy xây lại thực đơn để chọn món phù hợp hơn.",
+          "warn",
+        );
+      } else {
+        showToast("Đã tạo mục tiêu dinh dưỡng!");
+      }
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  // --- Thực đơn ---
+  async function handleCreatePlan(days) {
+    try {
+      await planApi.generate(days);
+      await reload("mealPlans");
+      trackEvent("plan_created", { days });
+      nav.closeOverlay();
+      nav.goToTab("plan");
+      showToast("Đã cập nhật thực đơn!");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  async function handleSwap(payload) {
+    try {
+      await planApi.swap(payload);
+      await reload("mealPlans");
+      showToast("Đã đổi món.");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  async function handleApplyDiversification(selections) {
+    try {
+      await planApi.applyDiversification(activePlan.id, selections);
+      await reload("mealPlans");
+      trackEvent("plan_ai_diversify_applied");
+      nav.closeOverlay();
+      nav.goToTab("plan");
+      showToast("Đã áp dụng gợi ý AI vào thực đơn!");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  // --- Hồ sơ & Premium ---
+  async function handleUpdateProfile(payload) {
+    try {
+      await updateProfile(payload);
+      showToast("Đã cập nhật hồ sơ.");
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  // Mock paywall: server chỉ đổi cờ isPremium, chưa có thanh toán thật.
+  async function handleSetPremium(value) {
+    try {
+      setUser(await (value ? premiumApi.upgrade() : premiumApi.cancel()));
+      trackEvent(value ? "premium_upgraded" : "premium_cancelled");
+      nav.closeOverlay();
+      showToast(
+        value ? "Chào mừng bạn đến với Premium! 🎉" : "Đã huỷ Premium.",
+      );
+    } catch (e) {
+      reportError(e);
+    }
+  }
+
+  function handleScanAnalyzed(payload) {
+    nav.setScanPending(payload);
+    refreshUser();
+  }
+
+  function handleScanSaved() {
+    trackEvent("scan_saved");
+    nav.setScanPending(null);
+    showToast("Đã lưu vào nhật ký ăn uống!");
+    nav.goToTab("home");
+  }
+
+  function renderPlanTab() {
+    if (!activeTarget) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-5">
+          <Card className="p-5">
+            <EmptyState
+              icon={Sparkles}
+              title="Cần có mục tiêu dinh dưỡng trước"
+              desc="Hãy tạo mục tiêu dinh dưỡng ở Trang chủ trước khi xây thực đơn."
+              action={
+                <Button full onPress={() => nav.openOverlay("target-create")}>
+                  Tạo mục tiêu ngay
+                </Button>
+              }
+            />
+          </Card>
+        </div>
+      );
+    }
+    if (!activePlan) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-5">
+          <Card className="p-5">
+            <EmptyState
+              icon={ClipboardList}
+              title="Chưa có thực đơn"
+              desc="Xây dựng thực đơn theo mục tiêu dinh dưỡng hiện tại của bạn."
+              action={
+                <Button
+                  full
+                  icon={Sparkles}
+                  onPress={() => nav.openOverlay("plan-create")}
+                >
+                  Tạo thực đơn
+                </Button>
+              }
+            />
+          </Card>
+        </div>
+      );
+    }
+    return (
+      <PlanViewScreen
+        plan={activePlan}
+        onBack={() => nav.goToTab("home")}
+        onRebuild={() => nav.openOverlay("plan-create")}
+        onViewHistory={() => nav.openOverlay("plan-history")}
+        onSwap={handleSwap}
+      />
+    );
+  }
+
+  function renderOverlay() {
+    const close = nav.closeOverlay;
+    switch (nav.overlay) {
+      case "bmi":
+        return (
+          <BMIScreen data={userData} onBack={close} onAddBMI={handleAddBMI} />
+        );
+      case "conditions":
+        return (
+          <ConditionsScreen
+            data={userData}
+            onBack={close}
+            onSave={handleSaveCondition}
+            onDelete={handleDeleteCondition}
+          />
+        );
+      case "target-create":
+        return (
+          <TargetCreateScreen
+            data={userData}
+            onBack={close}
+            onCreate={handleCreateTarget}
+          />
+        );
+      case "target-detail":
+        return (
+          <TargetDetailScreen
+            data={userData}
+            onBack={close}
+            onEdit={() => nav.openOverlay("target-create")}
+          />
+        );
+      case "plan-create":
+        return (
+          <PlanCreateScreen
+            data={userData}
+            onBack={close}
+            onCreate={handleCreatePlan}
+          />
+        );
+      case "plan-diversify":
+        return (
+          <PlanDiversifyScreen
+            plan={activePlan}
+            user={user}
+            onBack={close}
+            onGoUpgrade={() => nav.openOverlay("premium")}
+            onProposed={refreshUser}
+            onApply={handleApplyDiversification}
+          />
+        );
+      case "plan-history":
+        return <PlanHistoryScreen data={userData} onBack={close} />;
+      case "premium":
+        return (
+          <PremiumScreen
+            user={user}
+            onBack={close}
+            onSetPremium={handleSetPremium}
+          />
+        );
+      case "reminders":
+        return (
+          <RemindersScreen
+            reminders={userData.reminders}
+            onBack={close}
+            onSave={(reminders) => updateLocalData(user.id, { reminders })}
+          />
+        );
+      case "exercise":
+        return (
+          <ExerciseScreen
+            onBack={close}
+            showToast={showToast}
+            reportError={reportError}
+          />
+        );
+      case "admin-dashboard":
+        return (
+          <AdminDashboardScreen
+            onBack={close}
+            onGoUsers={() => nav.openOverlay("admin-users")}
+          />
+        );
+      case "admin-users":
+        return (
+          <AdminUsersScreen
+            onBack={close}
+            onGoDashboard={() => nav.openOverlay("admin-dashboard")}
+          />
+        );
+      default:
+        return null;
+    }
+  }
+
+  function renderContent() {
+    if (booting) {
+      return (
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <span className="w-9 h-9 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
+        </div>
+      );
+    }
+    if (!user) {
+      return authScreen === "login" ? (
+        <LoginScreen
+          onLogin={login}
+          onGoRegister={() => setAuthScreen("register")}
+        />
+      ) : (
+        <RegisterScreen
+          onRegister={register}
+          onGoLogin={() => setAuthScreen("login")}
+        />
+      );
+    }
+    if (user.isAdmin) {
+      if (nav.overlay) return renderOverlay();
+      if (nav.tab === "admin-users") {
+        return (
+          <AdminUsersScreen
+            onBack={null}
+            onGoDashboard={() => nav.goToTab("admin-dashboard")}
+          />
+        );
+      }
+      if (nav.tab === "profile") {
+        return (
+          <ProfileScreen
+            user={user}
+            data={userData || { bmiRecords: [], targets: [], conditions: [], mealPlans: [] }}
+            onLogout={logout}
+            onGoTo={nav.handleQuickAction}
+            onUpdateProfile={handleUpdateProfile}
+          />
+        );
+      }
+      return (
+        <AdminDashboardScreen
+          onBack={null}
+          onGoUsers={() => nav.goToTab("admin-users")}
+        />
+      );
+    }
+    if (!userData) {
+      return (
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <span className="w-9 h-9 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
+        </div>
+      );
+    }
+
+
+    if (userData.bmiRecords.length === 0) {
+      return (
+        <OnboardingScreen
+          fullName={user.fullName}
+          onComplete={handleOnboardingComplete}
+        />
+      );
+    }
+    if (nav.overlay) return renderOverlay();
+
+    return (
+      <div className="flex-1 flex flex-col min-h-0">
+        {nav.tab === "home" && (
+          <HomeScreen
+            user={user}
+            userData={userData}
+            onQuickAction={nav.handleQuickAction}
+            mealSyncVersion={mealSyncVersion}
+            onToggleMeal={handleToggleMeal}
+          />
+        )}
+        {nav.tab === "scan" && !nav.scanPending && (
+          <ScanScreen
+            mealSlot="trua"
+            onAnalyzed={handleScanAnalyzed}
+            onCancel={() => nav.goToTab("home")}
+          />
+        )}
+        {nav.tab === "scan" && nav.scanPending && (
+          <ScanResultScreen
+            scanId={nav.scanPending.scanId}
+            photoUri={nav.scanPending.photoUri}
+            result={nav.scanPending.result}
+            onDone={handleScanSaved}
+            onRetry={() => nav.setScanPending(null)}
+          />
+        )}
+        {nav.tab === "foods" && <FoodsScreen />}
+        {nav.tab === "plan" && renderPlanTab()}
+        {nav.tab === "profile" && (
+          <ProfileScreen
+            user={user}
+            data={userData}
+            onLogout={logout}
+            onGoTo={nav.handleQuickAction}
+            onUpdateProfile={handleUpdateProfile}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Đã đăng nhập + (là admin HOẶC đã xong onboarding) mới có thanh điều hướng chính.
+  const isInApp = Boolean(user && (user.isAdmin || (userData && userData.bmiRecords.length > 0)));
+  const navigation = isInApp
+    ? {
+        active: nav.tab,
+        tabs: user?.isAdmin ? ADMIN_TABS : NAV_TABS,
+        // Trên máy tính Sidebar còn hiện khi đang mở overlay: chọn mục = đóng overlay rồi chuyển tab.
+        onChange: (tab) => {
+          nav.closeOverlay();
+          nav.goToTab(tab);
+        },
+      }
+    : null;
+
+  return (
+    <>
+      <AppLayout navigation={navigation} hideMobileNav={Boolean(nav.overlay)} fullWidth={!booting && !user}>
+        {renderContent()}
+      </AppLayout>
+      <Toast toast={toast} />
+    </>
+  );
+}
