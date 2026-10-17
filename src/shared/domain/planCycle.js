@@ -1,4 +1,5 @@
 import { MEAL_TYPES } from "./constants";
+import { isRestDay, countRestDays } from "./restDay";
 
 const DAY_MS = 86400000;
 
@@ -22,10 +23,13 @@ export function cycleIndexForDate(plan, date = new Date()) {
 
 // Mức tuân thủ thực tế: đã check-off bao nhiêu bữa trong số bữa đã lên lịch,
 // và trung bình calo thực đã ăn/ngày (progress do máy lưu, khoá theo ngày).
+// Ngày nghỉ không nằm trong số bữa phải ăn; calo ăn vào ngày nghỉ vẫn được ghi nhận.
 export function computePlanStats(plan, progress) {
   const start = startOfDay(plan.createdAt);
   const end = startOfDay(plan.endedAt ?? new Date());
   const totalDays = Math.max(1, Math.round((end - start) / DAY_MS) + 1);
+  const restDays = countRestDays(dateKey(new Date(plan.createdAt)), dateKey(new Date(plan.endedAt ?? new Date())));
+  const scheduledDays = Math.max(1, totalDays - restDays);
   let completedMeals = 0;
   let completedKcal = 0;
   const loggedDays = new Set();
@@ -36,13 +40,13 @@ export function computePlanStats(plan, progress) {
     for (const mt of MEAL_TYPES) {
       const meal = entry[mt.id] && day?.meals.find((m) => m.mealSlot === mt.id);
       if (!meal) continue;
-      completedMeals += 1;
+      if (!isRestDay(dk)) completedMeals += 1;
       completedKcal += meal.kcal;
       loggedDays.add(dk);
     }
   }
 
-  const totalMealsScheduled = totalDays * MEAL_TYPES.length;
+  const totalMealsScheduled = scheduledDays * MEAL_TYPES.length;
   return {
     totalDays,
     completedMeals,

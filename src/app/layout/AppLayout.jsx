@@ -8,15 +8,20 @@ import DesktopLayout from "./DesktopLayout";
  * app, null khi đang đăng nhập/onboarding (lúc đó dùng khung hẹp ở mọi thiết bị).
  * `fullWidth`: màn đăng nhập/đăng ký trên máy tính dùng toàn chiều rộng (layout chia đôi);
  * điện thoại vẫn dùng khung hẹp. `hideMobileNav`: màn con (overlay) trên điện thoại che luôn thanh dưới; trên
- * máy tính Sidebar vẫn hiện để người dùng chuyển mục bất cứ lúc nào.
+ * máy tính Sidebar vẫn hiện để người dùng chuyển mục bất cứ lúc nào. `wideContent`: màn cần nhiều cột (Trang chủ)
+ * được mở rộng vùng nội dung trên máy tính.
  */
-export default function AppLayout({ navigation, hideMobileNav, fullWidth, children }) {
+export default function AppLayout({ navigation, hideMobileNav, fullWidth, wideContent, children }) {
   const isDesktop = useIsDesktop();
   if (isDesktop && fullWidth) {
     return <div className="h-screen w-full bg-bg flex flex-col overflow-hidden">{children}</div>;
   }
   if (isDesktop && navigation) {
-    return <DesktopLayout navigation={navigation}>{children}</DesktopLayout>;
+    return (
+      <DesktopLayout navigation={navigation} wide={wideContent}>
+        {children}
+      </DesktopLayout>
+    );
   }
   return <MobileLayout navigation={hideMobileNav ? null : navigation}>{children}</MobileLayout>;
 }

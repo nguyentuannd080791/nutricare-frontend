@@ -40,7 +40,7 @@ export default function AuthTextField({
           value={value}
           placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}
-          className={`w-full pl-11 ${rightPadding} py-3 rounded-xl bg-muted text-fg placeholder:text-fg/40 text-base border transition-all outline-none focus:bg-white focus:ring-4 ${borderStyle}`}
+          className={`w-full pl-11 ${rightPadding} py-2.5 rounded-xl bg-muted text-fg placeholder:text-fg/40 text-base border transition-all outline-none focus:bg-white focus:ring-4 ${borderStyle}`}
         />
         {secure ? (
           <button

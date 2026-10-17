@@ -22,7 +22,7 @@ const PROVIDERS = [
 
 export default function AuthSocialSection({ label }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="relative flex items-center justify-center">
         <div className="border-t border-border w-full" />
         <span className="bg-white px-3 text-xs font-medium text-fg/50 whitespace-nowrap">{label}</span>

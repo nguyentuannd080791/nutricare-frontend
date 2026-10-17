@@ -1,10 +1,10 @@
 /**
  * Bảng màu copy nguyên văn từ nutricare-expo/src/theme/colors.js để giữ
  * đúng thương hiệu khi chuyển RN -> React DOM + Tailwind. Không tự ý đổi giá trị
- * ở đây — nếu cần đổi màu, sửa src/theme/colors.js (nguồn sự thật duy nhất)
+ * ở đây — nếu cần đổi màu, sửa src/assets/theme/colors.js (nguồn sự thật duy nhất)
  * rồi đồng bộ lại file này.
  */
-import { COLORS } from "./src/theme/colors.js";
+import { COLORS } from "./src/assets/theme/colors.js";
 
 /** @type {import('tailwindcss').Config} */
 export default {

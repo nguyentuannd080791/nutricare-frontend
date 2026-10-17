@@ -4,19 +4,19 @@ const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_RULES = [
   {
     id: "minLength",
-    label: `Tối thiểu ${MIN_PASSWORD_LENGTH} ký tự`,
+    label: `Từ ${MIN_PASSWORD_LENGTH} ký tự`,
     message: `Mật khẩu cần tối thiểu ${MIN_PASSWORD_LENGTH} ký tự.`,
     test: (password) => password.length >= MIN_PASSWORD_LENGTH,
   },
   {
     id: "lowercase",
-    label: "Ít nhất 1 chữ cái thường (a-z)",
+    label: "Có chữ thường",
     message: "Mật khẩu cần có ít nhất 1 chữ cái thường.",
     test: (password) => /[a-z]/.test(password),
   },
   {
     id: "number",
-    label: "Ít nhất 1 chữ số (0-9)",
+    label: "Có chữ số",
     message: "Mật khẩu cần có ít nhất 1 chữ số.",
     test: (password) => /\d/.test(password),
   },
@@ -84,6 +84,13 @@ export function validateRegisterFields({ fullName, email, password, confirmPassw
     password: validatePassword(password),
     confirmPassword: validatePasswordConfirm(confirmPassword, password),
     terms: validateTermsAccepted(acceptedTerms),
+  };
+}
+
+export function validateResetFields({ password, confirmPassword }) {
+  return {
+    password: validatePassword(password),
+    confirmPassword: validatePasswordConfirm(confirmPassword, password),
   };
 }
 

@@ -8,7 +8,7 @@ import BottomNav from "../navigation/BottomNav";
 export default function MobileLayout({ navigation, children }) {
   return (
     <div className="h-screen w-full max-w-app mx-auto bg-bg flex flex-col overflow-hidden relative">
-      {children}
+      <div className="flex-1 min-h-0 h-full flex flex-col overflow-hidden">{children}</div>
       {navigation && <BottomNav active={navigation.active} onChange={navigation.onChange} tabs={navigation.tabs} />}
     </div>
   );

@@ -12,7 +12,7 @@ import AuthFieldError from "../components/AuthFieldError";
 import AuthSubmitButton from "../components/AuthSubmitButton";
 import AuthSocialSection from "../components/AuthSocialSection";
 import AuthTermsCheckbox from "../components/AuthTermsCheckbox";
-import PasswordChecklist from "../components/PasswordChecklist";
+import PasswordHint from "../components/PasswordHint";
 
 const INITIAL_VALUES = {
   fullName: "",
@@ -52,60 +52,62 @@ export default function RegisterScreen({ onRegister, onGoLogin }) {
   }
 
   return (
-    <AuthFormShell mode="register" onSwitchMode={onGoLogin}>
+    <AuthFormShell mode="register" wide>
       <div className="space-y-1.5">
         <h2 className="text-2xl sm:text-3xl font-bold text-fg tracking-tight">Tạo tài khoản</h2>
         <p className="text-sm text-fg/65">Bắt đầu hành trình ăn uống lành mạnh của bạn.</p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <AuthTextField
-          id="register-full-name"
-          label="Họ và tên"
-          icon={UserIcon}
-          value={values.fullName}
-          placeholder="Nguyễn Văn A"
-          autoComplete="name"
-          error={errors.fullName}
-          onChange={(value) => handleChange("fullName", value)}
-        />
+      <form onSubmit={handleSubmit} noValidate className="space-y-3 lg:space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+          <AuthTextField
+            id="register-full-name"
+            label="Họ và tên"
+            icon={UserIcon}
+            value={values.fullName}
+            placeholder="Nguyễn Văn A"
+            autoComplete="name"
+            error={errors.fullName}
+            onChange={(value) => handleChange("fullName", value)}
+          />
+          <AuthTextField
+            id="register-email"
+            label="Địa chỉ Email"
+            type="email"
+            icon={Mail}
+            value={values.email}
+            placeholder="ban@email.com"
+            autoComplete="email"
+            error={errors.email}
+            onChange={(value) => handleChange("email", value)}
+          />
+        </div>
 
-        <AuthTextField
-          id="register-email"
-          label="Địa chỉ Email"
-          type="email"
-          icon={Mail}
-          value={values.email}
-          placeholder="ban@email.com"
-          autoComplete="email"
-          error={errors.email}
-          onChange={(value) => handleChange("email", value)}
-        />
-
-        <AuthTextField
-          id="register-password"
-          label="Mật khẩu"
-          secure
-          icon={Lock}
-          value={values.password}
-          placeholder="Tạo mật khẩu"
-          autoComplete="new-password"
-          error={errors.password}
-          onChange={(value) => handleChange("password", value)}
-        />
-        <PasswordChecklist password={values.password} />
-
-        <AuthTextField
-          id="register-confirm-password"
-          label="Nhập lại mật khẩu"
-          secure
-          icon={Lock}
-          value={values.confirmPassword}
-          placeholder="Nhập lại mật khẩu"
-          autoComplete="new-password"
-          error={errors.confirmPassword}
-          onChange={(value) => handleChange("confirmPassword", value)}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
+          <AuthTextField
+            id="register-password"
+            label="Mật khẩu"
+            secure
+            icon={Lock}
+            value={values.password}
+            placeholder="Tạo mật khẩu"
+            autoComplete="new-password"
+            error={errors.password}
+            onChange={(value) => handleChange("password", value)}
+          />
+          <AuthTextField
+            id="register-confirm-password"
+            label="Nhập lại mật khẩu"
+            secure
+            icon={Lock}
+            value={values.confirmPassword}
+            placeholder="Nhập lại mật khẩu"
+            autoComplete="new-password"
+            error={errors.confirmPassword}
+            onChange={(value) => handleChange("confirmPassword", value)}
+          />
+        </div>
+        <PasswordHint password={values.password} />
 
         <AuthTermsCheckbox
           checked={values.acceptedTerms}

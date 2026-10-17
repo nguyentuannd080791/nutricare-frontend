@@ -5,6 +5,8 @@ import AppLayout from "./layout/AppLayout";
 
 import LoginScreen from "../modules/auth/pages/LoginScreen";
 import RegisterScreen from "../modules/auth/pages/RegisterScreen";
+import ForgotPasswordScreen from "../modules/auth/pages/ForgotPasswordScreen";
+import ResetPasswordScreen from "../modules/auth/pages/ResetPasswordScreen";
 import OnboardingScreen from "../modules/onboarding/pages/OnboardingScreen";
 import HomeScreen from "../modules/home/pages/HomeScreen";
 import ScanScreen from "../modules/scan/pages/ScanScreen";
@@ -22,6 +24,8 @@ import RemindersScreen from "../modules/reminders/pages/RemindersScreen";
 import PremiumScreen from "../modules/premium/pages/PremiumScreen";
 import FoodsScreen from "../modules/foods/pages/FoodsScreen";
 
+import { authApi } from "../modules/auth/api/authApi";
+import { getPendingResetToken, clearPendingResetToken } from "../modules/auth/storage/resetTokenStore";
 import { meApi } from "../modules/profile/api/meApi";
 import { bmiApi } from "../modules/bmi/api/bmiApi";
 import { targetApi } from "../modules/target/api/targetApi";
@@ -65,7 +69,7 @@ export default function App() {
     toggleMeal,
   } = useLocalData();
   const nav = useAppNavigation();
-  const [authScreen, setAuthScreen] = useState("login"); // login | register
+  const [authScreen, setAuthScreen] = useState(() => (getPendingResetToken() ? "reset" : "login")); // login | register | forgot | reset
 
   const {
     booting,
@@ -113,37 +117,48 @@ export default function App() {
   const activePlan = userData?.mealPlans.find((p) => p.isActive);
 
   // Chống bấm đúp: khoá theo (ngày, bữa) bằng ref để không dính stale closure.
-  const mealSyncInFlight = useRef(new Set());
+  const mealDebounceTimers = useRef(new Map());
   const [mealSyncVersion, setMealSyncVersion] = useState(0);
 
-  // Tick "đã ăn": cập nhật ngay trên máy (lạc quan) rồi gửi server đối chiếu với
-  // thực đơn; server từ chối hoặc mất mạng thì hoàn tác và báo lỗi.
-  async function handleToggleMeal(dateKeyStr, mealSlot, planId) {
+  // Tick "đã ăn": cập nhật ngay trên máy (lạc quan 0ms), không bao giờ khoá nút.
+  // Áp dụng debounce ngắn (350ms) để gom các lần bấm liên tiếp, chỉ gửi trạng
+  // thái cuối cùng xuống server và tránh gọi API dồn dập.
+  function handleToggleMeal(dateKeyStr, mealSlot, planId) {
     const guardKey = `${dateKeyStr}|${mealSlot}`;
-    const plan = userData.mealPlans.find((p) => p.id === planId);
-    if (!plan || mealSyncInFlight.current.has(guardKey)) return;
+    const plan = userData?.mealPlans.find((p) => p.id === planId);
+    if (!plan) return;
 
-    const entry = userData.progress[dateKeyStr];
-    const eaten = !(entry?.planId === planId && entry[mealSlot]);
-    const cycleIdx = cycleIndexForDate(plan, dateKeyStr);
-
-    mealSyncInFlight.current.add(guardKey);
+    // 1. Phản hồi giao diện tức thì (0ms)
     toggleMeal(user.id, dateKeyStr, mealSlot, planId);
-    try {
-      await mealLogApi.set({
-        planId,
-        date: dateKeyStr,
-        dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1,
-        mealSlot,
-        eaten,
-      });
-    } catch (e) {
-      toggleMeal(user.id, dateKeyStr, mealSlot, planId);
-      reportError(e);
-    } finally {
-      mealSyncInFlight.current.delete(guardKey);
-      setMealSyncVersion((version) => version + 1);
+
+    // 2. Debounce gửi đồng bộ xuống server sau 350ms
+    if (mealDebounceTimers.current.has(guardKey)) {
+      clearTimeout(mealDebounceTimers.current.get(guardKey));
     }
+
+    const timer = setTimeout(async () => {
+      mealDebounceTimers.current.delete(guardKey);
+      try {
+        const latestLocal = await loadLocal(user.id);
+        const eaten = Boolean(latestLocal?.progress?.[dateKeyStr]?.[mealSlot]);
+        const cycleIdx = cycleIndexForDate(plan, dateKeyStr);
+
+        await mealLogApi.set({
+          planId,
+          date: dateKeyStr,
+          dayIndex: plan.days[cycleIdx]?.dayIndex ?? cycleIdx + 1,
+          mealSlot,
+          eaten,
+        });
+      } catch (e) {
+        toggleMeal(user.id, dateKeyStr, mealSlot, planId);
+        reportError(e);
+      } finally {
+        setMealSyncVersion((version) => version + 1);
+      }
+    }, 350);
+
+    mealDebounceTimers.current.set(guardKey, timer);
   }
 
   // Khai báo TRƯỚC effect pageview bên dưới: React chạy effect theo thứ tự khai
@@ -392,7 +407,7 @@ export default function App() {
     switch (nav.overlay) {
       case "bmi":
         return (
-          <BMIScreen data={userData} onBack={close} onAddBMI={handleAddBMI} />
+          <BMIScreen data={userData} user={user} onBack={close} onAddBMI={handleAddBMI} />
         );
       case "conditions":
         return (
@@ -483,6 +498,51 @@ export default function App() {
     }
   }
 
+  async function handleRequestReset(email) {
+    try {
+      await authApi.forgotPassword(email);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  async function handleResetPassword(password) {
+    try {
+      await authApi.resetPassword(getPendingResetToken(), password);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  function leaveResetFlow(nextScreen) {
+    clearPendingResetToken();
+    if (user) logout();
+    setAuthScreen(nextScreen);
+  }
+
+  function goToLogin() {
+    leaveResetFlow("login");
+  }
+
+  function goToForgot() {
+    leaveResetFlow("forgot");
+  }
+
+  function renderAuthScreen() {
+    if (authScreen === "register") {
+      return <RegisterScreen onRegister={register} onGoLogin={goToLogin} />;
+    }
+    if (authScreen === "forgot") {
+      return <ForgotPasswordScreen onRequestReset={handleRequestReset} onGoLogin={goToLogin} />;
+    }
+    if (authScreen === "reset") {
+      return <ResetPasswordScreen onResetPassword={handleResetPassword} onGoLogin={goToLogin} onGoForgot={goToForgot} />;
+    }
+    return <LoginScreen onLogin={login} onGoRegister={() => setAuthScreen("register")} onGoForgot={goToForgot} />;
+  }
+
   function renderContent() {
     if (booting) {
       return (
@@ -491,19 +551,7 @@ export default function App() {
         </div>
       );
     }
-    if (!user) {
-      return authScreen === "login" ? (
-        <LoginScreen
-          onLogin={login}
-          onGoRegister={() => setAuthScreen("register")}
-        />
-      ) : (
-        <RegisterScreen
-          onRegister={register}
-          onGoLogin={() => setAuthScreen("login")}
-        />
-      );
-    }
+    if (!user || authScreen === "reset") return renderAuthScreen();
     if (user.isAdmin) {
       if (nav.overlay) return renderOverlay();
       if (nav.tab === "admin-users") {
@@ -578,7 +626,12 @@ export default function App() {
             onRetry={() => nav.setScanPending(null)}
           />
         )}
-        {nav.tab === "foods" && <FoodsScreen />}
+        {nav.tab === "foods" && (
+          <FoodsScreen
+            userConditions={userData?.conditions}
+            onNavigateToConditions={() => nav.openOverlay("conditions")}
+          />
+        )}
         {nav.tab === "plan" && renderPlanTab()}
         {nav.tab === "profile" && (
           <ProfileScreen
@@ -594,7 +647,8 @@ export default function App() {
   }
 
   // Đã đăng nhập + (là admin HOẶC đã xong onboarding) mới có thanh điều hướng chính.
-  const isInApp = Boolean(user && (user.isAdmin || (userData && userData.bmiRecords.length > 0)));
+  const showingAuth = !booting && (!user || authScreen === "reset");
+  const isInApp = Boolean(user && authScreen !== "reset" && (user.isAdmin || (userData && userData.bmiRecords.length > 0)));
   const navigation = isInApp
     ? {
         active: nav.tab,
@@ -609,7 +663,18 @@ export default function App() {
 
   return (
     <>
-      <AppLayout navigation={navigation} hideMobileNav={Boolean(nav.overlay)} fullWidth={!booting && !user}>
+      <AppLayout
+        navigation={navigation}
+        hideMobileNav={Boolean(nav.overlay)}
+        fullWidth={showingAuth}
+        wideContent={
+          isInApp &&
+          !user.isAdmin &&
+          ((!nav.overlay && (nav.tab === "home" || nav.tab === "foods")) ||
+            nav.overlay === "bmi" ||
+            nav.overlay === "conditions")
+        }
+      >
         {renderContent()}
       </AppLayout>
       <Toast toast={toast} />

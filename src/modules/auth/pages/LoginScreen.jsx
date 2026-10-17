@@ -14,7 +14,7 @@ const NO_ERRORS = {};
  * @param {(email:string, password:string) => Promise<string|null>} onLogin
  *   Trả về null nếu thành công, hoặc chuỗi lỗi để hiển thị.
  */
-export default function LoginScreen({ onLogin, onGoRegister }) {
+export default function LoginScreen({ onLogin, onGoRegister, onGoForgot }) {
   const [values, setValues] = useState(INITIAL_VALUES);
   const [rememberMe, setRememberMe] = useState(true);
   const [submitted, setSubmitted] = useState(false);
@@ -40,7 +40,7 @@ export default function LoginScreen({ onLogin, onGoRegister }) {
   }
 
   return (
-    <AuthFormShell mode="login" onSwitchMode={onGoRegister}>
+    <AuthFormShell mode="login">
       <div className="space-y-1.5">
         <h2 className="text-2xl sm:text-3xl font-bold text-fg tracking-tight">Chào mừng bạn trở lại</h2>
         <p className="text-sm text-fg/65">
@@ -71,7 +71,11 @@ export default function LoginScreen({ onLogin, onGoRegister }) {
           autoComplete="current-password"
           error={errors.password}
           headerAction={
-            <button type="button" className="text-xs font-semibold text-primary hover:text-primaryDark">
+            <button
+              type="button"
+              onClick={onGoForgot}
+              className="text-xs font-semibold text-primary hover:text-primaryDark"
+            >
               Quên mật khẩu?
             </button>
           }
@@ -85,7 +89,7 @@ export default function LoginScreen({ onLogin, onGoRegister }) {
             onChange={(event) => setRememberMe(event.target.checked)}
             className="w-4 h-4 rounded border-border accent-primary"
           />
-          <span className="text-sm text-fg/80 font-medium">Ghi nhớ đăng nhập (30 ngày)</span>
+          <span className="text-sm text-fg/80 font-medium">Ghi nhớ đăng nhập</span>
         </label>
 
         <AuthFieldError message={serverError} />

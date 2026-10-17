@@ -1,23 +1,8 @@
 import React from "react";
-import { Salad, Flame, Sparkles } from "lucide-react";
+import { Salad, Flame, Sparkles, ShieldCheck, KeyRound } from "lucide-react";
 import AuthBrandLogo from "./AuthBrandLogo";
 
-const BANNER_COPY = {
-  login: {
-    badge: "Đồng hành cùng sức khoẻ của bạn",
-    title: "Khởi đầu ngày mới tràn đầy năng lượng tích cực.",
-    description:
-      "Đăng nhập để tiếp tục theo dõi lộ trình dinh dưỡng, mục tiêu vận động và duy trì thói quen sống lành mạnh mỗi ngày.",
-  },
-  register: {
-    badge: "Khởi tạo lộ trình sức khoẻ mới",
-    title: "Xây dựng thói quen lành mạnh ngay từ hôm nay.",
-    description:
-      "Tạo tài khoản miễn phí để thiết lập chỉ số cơ thể, nhận gợi ý thực đơn phù hợp và theo dõi năng lượng mỗi ngày.",
-  },
-};
-
-const HIGHLIGHTS = [
+const NUTRITION_HIGHLIGHTS = [
   {
     icon: Salad,
     title: "Thực đơn cá nhân hóa",
@@ -29,6 +14,50 @@ const HIGHLIGHTS = [
     description: "Kiểm soát lượng calo nạp vào và tiêu hao chuẩn xác",
   },
 ];
+
+const RECOVERY_HIGHLIGHTS = [
+  {
+    icon: ShieldCheck,
+    title: "Liên kết bảo mật",
+    description: "Liên kết đặt lại mật khẩu chỉ dùng được một lần",
+  },
+  {
+    icon: KeyRound,
+    title: "Khôi phục nhanh chóng",
+    description: "Liên kết có hiệu lực trong vòng 15 phút",
+  },
+];
+
+const BANNER_COPY = {
+  login: {
+    badge: "Đồng hành cùng sức khoẻ của bạn",
+    title: "Khởi đầu ngày mới tràn đầy năng lượng tích cực.",
+    description:
+      "Đăng nhập để tiếp tục theo dõi lộ trình dinh dưỡng, mục tiêu vận động và duy trì thói quen sống lành mạnh mỗi ngày.",
+    highlights: NUTRITION_HIGHLIGHTS,
+  },
+  register: {
+    badge: "Khởi tạo lộ trình sức khoẻ mới",
+    title: "Xây dựng thói quen lành mạnh ngay từ hôm nay.",
+    description:
+      "Tạo tài khoản miễn phí để thiết lập chỉ số cơ thể, nhận gợi ý thực đơn phù hợp và theo dõi năng lượng mỗi ngày.",
+    highlights: NUTRITION_HIGHLIGHTS,
+  },
+  forgot: {
+    badge: "Bảo vệ tài khoản cá nhân",
+    title: "An tâm tiếp tục hành trình chăm sóc bản thân.",
+    description:
+      "Đừng lo lắng nếu bạn quên mật khẩu. Chúng tôi sẽ hỗ trợ bạn thiết lập lại quyền truy cập an toàn trong vài bước đơn giản.",
+    highlights: RECOVERY_HIGHLIGHTS,
+  },
+  reset: {
+    badge: "Bảo vệ tài khoản cá nhân",
+    title: "Sắp xong rồi, hãy đặt một mật khẩu mới.",
+    description:
+      "Chọn mật khẩu mới mà bạn dễ nhớ nhưng người khác khó đoán. Sau khi đổi, bạn có thể đăng nhập lại ngay.",
+    highlights: RECOVERY_HIGHLIGHTS,
+  },
+};
 
 export default function AuthBrandShowcase({ mode }) {
   const copy = BANNER_COPY[mode];
@@ -52,7 +81,7 @@ export default function AuthBrandShowcase({ mode }) {
       </div>
 
       <div className="relative z-10 space-y-4 max-w-lg">
-        {HIGHLIGHTS.map((item) => {
+        {copy.highlights.map((item) => {
           const Icon = item.icon;
           return (
             <div
