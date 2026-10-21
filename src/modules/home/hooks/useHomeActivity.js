@@ -61,18 +61,30 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
 
   const workoutDebounceTimers = useRef(new Map());
   const pendingWorkoutSync = useRef(new Map());
+  const activityRef = useRef(activity);
+
+  useEffect(() => {
+    activityRef.current = activity;
+  }, [activity]);
 
   useEffect(() => {
     let cancelled = false;
 
     const handlePartialUpdate = (key, value) => {
       if (!cancelled && value) {
-        setActivity((prev) => ({ ...prev, [key]: value }));
+        setActivity((prev) => {
+          const next = { ...prev, [key]: value };
+          activityRef.current = next;
+          return next;
+        });
       }
     };
 
     fetchActivity(date, handlePartialUpdate).then((loaded) => {
-      if (!cancelled) setActivity(loaded);
+      if (!cancelled) {
+        setActivity(loaded);
+        activityRef.current = loaded;
+      }
     });
 
     return () => {
@@ -84,7 +96,7 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
    * Toggle bài tập:
    * - CẬP NHẬT UI TỨC THÌ (0ms), không hề có độ trễ giữa các lần bấm
    * - Không chặn/khóa click của người dùng
-   * - Gom request bằng debounce 350ms, tránh spam API khi người dùng bấm liên tục
+   * - Gom request bằng debounce 350ms, gửi trạng thái chính xác (thêm/xóa) xuống backend
    * - Hoàn tác nếu có lỗi mạng
    */
   const toggleWorkout = useCallback(
@@ -93,24 +105,25 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
       const exerciseId = workout.exerciseId;
       setError("");
 
-      let desiredCompleted = false;
-      let desiredMinutes = workout.minutes || 0;
-      let knownLogIds = [];
-      let snapshotActivity = null;
+      // 1. Phân giải trạng thái kế tiếp ĐỒNG BỘ từ activityRef (tránh stale closure và React batching lag)
+      const currentActivity = activityRef.current;
+      const currentPlan = currentActivity?.workoutPlan || initialActivity?.workoutPlan;
+      const currentWorkout = currentPlan?.workouts?.find((w) => w.exerciseId === exerciseId);
 
-      // BƯỚC 1: CẬP NHẬT STATE UI TỨC THÌ (0ms) - Phản hồi mượt mà tuyệt đối
+      const isCurrentlyCompleted = currentWorkout !== undefined
+        ? Boolean(currentWorkout.completed)
+        : Boolean(workout.completed);
+      const desiredCompleted = !isCurrentlyCompleted;
+      const desiredMinutes = currentWorkout?.minutes || workout.minutes || 0;
+      const knownLogIds = currentWorkout?.logIds || workout.logIds || [];
+      const snapshotActivity = currentActivity;
+
+      // 2. CẬP NHẬT STATE UI TỨC THÌ (0ms) - Phản hồi mượt mà tuyệt đối
       setActivity((prev) => {
-        snapshotActivity = prev;
-        const currentPlan = prev.workoutPlan || initialActivity?.workoutPlan;
-        if (!currentPlan) return prev;
+        const plan = prev.workoutPlan || initialActivity?.workoutPlan;
+        if (!plan) return prev;
 
-        const currentWorkout = currentPlan.workouts?.find((w) => w.exerciseId === exerciseId);
-        // Suy ra trạng thái kế tiếp từ store hiện tại, tránh stale closure khi bấm nhanh
-        desiredCompleted = currentWorkout ? !currentWorkout.completed : !workout.completed;
-        desiredMinutes = currentWorkout?.minutes || workout.minutes || 0;
-        knownLogIds = currentWorkout?.logIds || workout.logIds || [];
-
-        const nextWorkouts = (currentPlan.workouts || []).map((w) => {
+        const nextWorkouts = (plan.workouts || []).map((w) => {
           if (w.exerciseId === exerciseId) {
             return {
               ...w,
@@ -123,20 +136,22 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
           return w;
         });
 
-        // TÍNH TOÁN TUYỆT ĐỐI TỪ DANH SÁCH BÀI TẬP (chống hoàn toàn hiện tượng cộng dồn hoặc nhân đôi)
+        // TÍNH TOÁN TUYỆT ĐỐI TỪ DANH SÁCH BÀI TẬP (chống cộng dồn hoặc nhân đôi)
         const doneCount = nextWorkouts.filter((w) => w.completed).length;
+        const extraKcal = (plan.extraWorkouts || []).reduce((sum, w) => sum + (w.burnedKcal || 0), 0);
+        const extraMinutes = (plan.extraWorkouts || []).reduce((sum, w) => sum + (w.minutes || 0), 0);
         const nextBurnedKcal = nextWorkouts
           .filter((w) => w.completed)
-          .reduce((sum, w) => sum + (w.plannedKcal || 0), 0);
+          .reduce((sum, w) => sum + (w.plannedKcal || 0), 0) + extraKcal;
         const nextActiveMinutes = nextWorkouts
           .filter((w) => w.completed)
-          .reduce((sum, w) => sum + (w.minutes || 0), 0);
+          .reduce((sum, w) => sum + (w.minutes || 0), 0) + extraMinutes;
 
-        const currentBurned = currentPlan.burnedKcal || 0;
+        const currentBurned = plan.burnedKcal || 0;
         const deltaKcal = nextBurnedKcal - currentBurned;
 
         const nextPlan = {
-          ...currentPlan,
+          ...plan,
           workouts: nextWorkouts,
           doneCount,
           burnedKcal: nextBurnedKcal,
@@ -151,14 +166,16 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
             }
           : null;
 
-        return {
+        const nextAct = {
           ...prev,
           workoutPlan: nextPlan,
           summary: nextSummary ?? prev.summary,
         };
+        activityRef.current = nextAct;
+        return nextAct;
       });
 
-      // Lưu trạng thái mong muốn mới nhất
+      // 3. Lưu trạng thái đồng bộ mong muốn
       pendingWorkoutSync.current.set(exerciseId, {
         isCompleting: desiredCompleted,
         minutes: desiredMinutes,
@@ -166,7 +183,7 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
         snapshotActivity,
       });
 
-      // BƯỚC 2: DEBOUNCE GỬI API XUỐNG SERVER (350ms) - Gom các lần bấm liên tiếp, không khóa nút
+      // 4. DEBOUNCE GỬI API XUỐNG SERVER (350ms)
       if (workoutDebounceTimers.current.has(exerciseId)) {
         clearTimeout(workoutDebounceTimers.current.get(exerciseId));
       }
@@ -182,11 +199,12 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
             const created = await exerciseApi.add({
               exerciseId,
               minutes: target.minutes,
+              date,
             });
             if (created?.id) {
               setActivity((prev) => {
                 if (!prev.workoutPlan) return prev;
-                return {
+                const nextAct = {
                   ...prev,
                   workoutPlan: {
                     ...prev.workoutPlan,
@@ -195,22 +213,25 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
                     ),
                   },
                 };
+                activityRef.current = nextAct;
+                return nextAct;
               });
             }
           } else {
             // Bỏ tick:
-            // 1. Gọi xóa theo exerciseId để server dọn sạch mọi bản ghi hôm nay của bài tập này
-            await exerciseApi.remove(exerciseId).catch(() => null);
+            // 1. Gọi xóa theo exerciseId cho ngày hôm nay để server dọn sạch bản ghi
+            await exerciseApi.remove(exerciseId, date).catch(() => null);
             // 2. Dọn thêm các id cụ thể nếu có
             for (const logId of target.knownLogIds) {
               if (logId && logId !== "opt-pending" && logId !== exerciseId) {
-                await exerciseApi.remove(logId).catch(() => null);
+                await exerciseApi.remove(logId, date).catch(() => null);
               }
             }
           }
         } catch (e) {
           if (target.snapshotActivity) {
             setActivity(target.snapshotActivity);
+            activityRef.current = target.snapshotActivity;
           }
           setError(e.message || "Không thể đồng bộ bài tập với máy chủ");
         }
@@ -218,24 +239,91 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
 
       workoutDebounceTimers.current.set(exerciseId, timer);
     },
-    [initialActivity]
+    [date, initialActivity]
   );
 
   const setWaterCups = useCallback(
     async (cups) => {
       setError("");
-      setActivity((previous) => ({
-        ...previous,
-        water: previous.water ? { ...previous.water, cups } : { cups, goalCups: 8, cupMl: 250, maxCups: 12 },
-      }));
+      setActivity((previous) => {
+        const next = {
+          ...previous,
+          water: previous.water ? { ...previous.water, cups } : { cups, goalCups: 8, cupMl: 250, maxCups: 12 },
+        };
+        activityRef.current = next;
+        return next;
+      });
       try {
         await waterApi.set(cups);
       } catch (e) {
         setError(e.message);
-        setActivity(await fetchActivity(date));
+        const refreshed = await fetchActivity(date);
+        setActivity(refreshed);
+        activityRef.current = refreshed;
       }
     },
     [date]
+  );
+
+  const removeExtraWorkout = useCallback(
+    async (idOrExerciseId) => {
+      if (!idOrExerciseId) return;
+
+      // Lưu lại snapshot để hoàn tác nếu có lỗi mạng
+      const snapshotActivity = activityRef.current;
+
+      // 1. Cập nhật state UI ngay lập tức: loại bỏ bài tập thêm, bảo toàn 100% trạng thái bài tập kế hoạch
+      setActivity((prev) => {
+        const currentPlan = prev?.workoutPlan || initialActivity?.workoutPlan;
+        if (!currentPlan) return prev;
+
+        const currentExtra = currentPlan.extraWorkouts || [];
+        const target = currentExtra.find(
+          (w) => w.id === idOrExerciseId || w.exerciseId === idOrExerciseId
+        );
+        const removedKcal = target?.burnedKcal || 0;
+        const removedMinutes = target?.minutes || 0;
+
+        const nextExtra = currentExtra.filter(
+          (w) => w.id !== idOrExerciseId && w.exerciseId !== idOrExerciseId
+        );
+
+        const nextPlan = {
+          ...currentPlan,
+          extraWorkouts: nextExtra,
+          burnedKcal: Math.max(0, (currentPlan.burnedKcal || 0) - removedKcal),
+          activeMinutes: Math.max(0, (currentPlan.activeMinutes || 0) - removedMinutes),
+        };
+
+        const currentSummary = prev.summary || initialActivity?.summary;
+        const nextSummary = currentSummary
+          ? {
+              ...currentSummary,
+              burnedKcal: Math.max(0, (currentSummary.burnedKcal || 0) - removedKcal),
+            }
+          : currentSummary;
+
+        const nextAct = {
+          ...prev,
+          workoutPlan: nextPlan,
+          summary: nextSummary,
+        };
+        activityRef.current = nextAct;
+        return nextAct;
+      });
+
+      // 2. Gửi lệnh xóa xuống server (có kèm ngày để xóa an toàn)
+      try {
+        await exerciseApi.remove(idOrExerciseId, date);
+      } catch (e) {
+        if (snapshotActivity) {
+          setActivity(snapshotActivity);
+          activityRef.current = snapshotActivity;
+        }
+        setError(e.message || "Không thể xoá bài tập");
+      }
+    },
+    [date, initialActivity]
   );
 
   const effectiveWorkoutPlan = activity.workoutPlan || initialActivity?.workoutPlan || null;
@@ -252,6 +340,7 @@ export function useHomeActivity(date, refreshKey = 0, initialActivity = null) {
     streak: effectiveStreak,
     error,
     toggleWorkout,
+    removeExtraWorkout,
     setWaterCups,
   };
 }

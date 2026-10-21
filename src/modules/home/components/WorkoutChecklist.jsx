@@ -1,12 +1,17 @@
 import React from "react";
-import { CheckCircle2, Circle, Activity, Dumbbell, Flame, ChevronRight } from "lucide-react";
+import { CheckCircle2, Circle, Activity, Dumbbell, Flame, ChevronRight, Sparkles, Trash2 } from "lucide-react";
 import RestDayNotice from "./RestDayNotice";
 
 /**
- * Danh sách Bài tập đi kèm (SOLID: Single Responsibility).
- * Có tích hợp Skeleton loader tinh tế khi dữ liệu đang nạp để giữ vững layout.
+ * Danh sách Bài tập đi kèm & Bài tập đã tập hôm nay (SOLID: Single Responsibility).
+ * Đồng bộ toàn diện dữ liệu 2 chiều giữa Kế hoạch ngày và Thư viện bài tập.
  */
-export default function WorkoutChecklist({ workoutPlan, onToggleWorkout, onExploreWorkouts }) {
+export default function WorkoutChecklist({
+  workoutPlan,
+  onToggleWorkout,
+  onRemoveExtraWorkout,
+  onExploreWorkouts,
+}) {
   // Skeleton loader nếu dữ liệu đang nạp để chống giật trang
   if (!workoutPlan) {
     return (
@@ -41,9 +46,11 @@ export default function WorkoutChecklist({ workoutPlan, onToggleWorkout, onExplo
   const totalCount = workoutPlan.totalCount || workoutPlan.workouts?.length || 0;
   const burnedKcal = workoutPlan.burnedKcal || 0;
   const plannedKcal = workoutPlan.plannedKcal || 0;
+  const extraWorkouts = workoutPlan.extraWorkouts || [];
 
   return (
     <section className="rounded-3xl bg-white border border-[#DCEEE7] p-5 sm:p-7 shadow-sm space-y-5">
+      {/* Header chính của Card */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-[#FFF7ED] text-[#EA580C]">
@@ -54,16 +61,18 @@ export default function WorkoutChecklist({ workoutPlan, onToggleWorkout, onExplo
               Bài tập đi kèm - {plannedKcal} calo
             </h2>
             <p className="text-xs text-[#0F172A]/60">
-              Hoàn thành bài tập để mở khóa hạn mức ăn mà không bị dư calo
+              Hoàn thành bài tập để tiêu hao năng lượng và duy trì thể trạng
             </p>
           </div>
         </div>
 
         <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FFF7ED] text-[#EA580C] border border-[#EA580C]/20">
-          {doneCount}/{totalCount} bài • Đã đốt {burnedKcal} calo
+          {doneCount}/{totalCount} bài kế hoạch
+          {extraWorkouts.length > 0 ? ` • +${extraWorkouts.length} bài thêm` : ""} • Đã đốt {burnedKcal} calo
         </span>
       </div>
 
+      {/* KHỐI 1: CÁC BÀI TẬP TRONG KẾ HOẠCH HÔM NAY */}
       <div className="space-y-3">
         {workoutPlan.workouts?.map((workout) => {
           const completed = Boolean(workout.completed);
@@ -103,14 +112,13 @@ export default function WorkoutChecklist({ workoutPlan, onToggleWorkout, onExplo
                 <div className="space-y-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-bold text-[#EA580C]">
-                      {workout.category || "Bài tập"}
+                      {workout.category || "Theo thực đơn"}
                     </span>
                     <span className="text-[11px] text-[#0F172A]/50 font-medium">
-                      • {workout.time} ({workout.minutes} phút)
+                      • {workout.time ? `${workout.time} (${workout.minutes} phút)` : `${workout.minutes} phút`}
                     </span>
                   </div>
 
-                  {/* Tên bài tập: Không gạch ngang, chỉ làm dịu màu khi đã tập */}
                   <h3
                     className={`text-sm font-bold leading-snug transition-colors ${
                       completed ? "text-[#0F172A]/60" : "text-[#0F172A]"
@@ -142,6 +150,60 @@ export default function WorkoutChecklist({ workoutPlan, onToggleWorkout, onExplo
         })}
       </div>
 
+      {/* KHỐI 2: CÁC BÀI TẬP BỔ SUNG ĐÃ GHI TỪ THƯ VIỆN BÀI TẬP (NẾU CÓ) */}
+      {extraWorkouts.length > 0 && (
+        <div className="pt-2 border-t border-slate-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#0F172A] flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
+              Bài tập bổ sung đã ghi hôm nay
+            </span>
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669]">
+              Từ Thư viện
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {extraWorkouts.map((extra) => (
+              <div
+                key={extra.id || extra.exerciseId}
+                className="p-3.5 rounded-2xl border border-[#10B981]/25 bg-[#F4FBF7] flex items-center justify-between gap-3 group"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <CheckCircle2 className="w-5 h-5 text-[#059669] fill-[#ECFDF5] shrink-0" />
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-bold text-[#0F172A] leading-tight truncate">
+                      {extra.label}
+                    </h4>
+                    <span className="text-[11.5px] text-[#0F172A]/60 font-medium">
+                      {extra.minutes} phút • Đã hoàn thành
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs font-extrabold text-[#059669] flex items-center gap-1">
+                    <Flame className="w-3.5 h-3.5 text-[#EA580C]" />+{extra.burnedKcal} calo
+                  </span>
+                  {typeof onRemoveExtraWorkout === "function" && (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveExtraWorkout(extra.id || extra.exerciseId)}
+                      title="Xóa bài tập này"
+                      aria-label={`Xóa bài tập ${extra.label}`}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Chân card: Khám phá thư viện bài tập */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
         <span className="text-xs text-slate-500 font-medium">
           Cần thêm bài tập phù hợp thể trạng?

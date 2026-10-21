@@ -42,24 +42,23 @@ export default function CalorieHeroCard({
     >
       {/* Hàng 1: Huy hiệu trạng thái & Mục tiêu tổng */}
       <div className="flex items-center justify-between gap-2">
-        <span
-          className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${
-            restDay
-              ? "bg-[#F0F8F6] text-[#059669] border-[#DCEEE7]"
-              : isSurplusWarning
-              ? "bg-[#FFF7ED] text-[#EA580C] border-[#FFEDD5]"
-              : "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-          }`}
-        >
-          {restDay ? (
-            <Moon className="w-3.5 h-3.5 text-[#059669]" />
-          ) : isSurplusWarning ? (
-            <AlertTriangle className="w-3.5 h-3.5 text-[#EA580C]" />
-          ) : (
-            <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
-          )}
-          {status.badge}
-        </span>
+        {status.badge ? (
+          <span
+            className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${restDay
+                ? "bg-[#F0F8F6] text-[#059669] border-[#DCEEE7]"
+                : "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+              }`}
+          >
+            {restDay ? (
+              <Moon className="w-3.5 h-3.5 text-[#059669]" />
+            ) : (
+              <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
+            )}
+            {status.badge}
+          </span>
+        ) : (
+          <div />
+        )}
 
         {onTargetPress ? (
           <button
@@ -84,18 +83,17 @@ export default function CalorieHeroCard({
               {calorieBalance.consumed.toLocaleString()}
             </span>
             <span className="text-xs text-[#0F172A]/50 font-semibold">
-              / {calorieBalance.getUnlockedAllowance().toLocaleString()} calo mở khóa
+              / {calorieBalance.getUnlockedAllowance().toLocaleString()} calo
             </span>
           </div>
 
           <span
-            className={`text-xs font-bold px-2.5 py-1 rounded-xl border shrink-0 ${
-              isSurplusWarning
+            className={`text-xs font-bold px-2.5 py-1 rounded-xl border shrink-0 ${isSurplusWarning
                 ? "bg-[#FFF7ED] text-[#EA580C] border-[#FFEDD5]"
                 : "bg-[#ECFDF5] text-[#059669] border-[#DCEEE7]"
-            }`}
+              }`}
           >
-            {isSurplusWarning ? `Vượt +${surplus} calo` : `Còn nạp: ${remainingUnlocked} calo`}
+            {isSurplusWarning ? `Vượt +${surplus} calo` : `Cần nạp: ${remainingUnlocked} calo`}
           </span>
         </div>
 
@@ -105,9 +103,8 @@ export default function CalorieHeroCard({
             style={{ width: `${unlockedPercent}%` }}
           />
           <div
-            className={`relative h-full rounded-full transition-all duration-500 ${
-              isSurplusWarning ? "bg-[#EA580C]" : "bg-[#059669]"
-            }`}
+            className={`relative h-full rounded-full transition-all duration-500 ${isSurplusWarning ? "bg-[#EA580C]" : "bg-[#059669]"
+              }`}
             style={{ width: `${intakePercent}%` }}
           />
         </div>

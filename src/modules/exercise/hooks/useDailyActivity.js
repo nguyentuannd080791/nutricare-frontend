@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { exerciseApi } from "../api/exerciseApi";
 import { dailySummaryApi } from "../api/dailySummaryApi";
+import { workoutPlanApi } from "../api/workoutPlanApi";
 
-const EMPTY_DAY = { date: null, summary: null, entries: [], error: null };
+const EMPTY_DAY = { date: null, summary: null, entries: [], workoutPlan: null, error: null };
 
 async function fetchDay(date) {
-  const [summary, exercise] = await Promise.all([
+  const [summary, exercise, workoutPlan] = await Promise.all([
     dailySummaryApi.get(date).catch(() => null),
     exerciseApi.list(date),
+    workoutPlanApi.get(date).catch(() => null),
   ]);
-  return { date, summary, entries: exercise.entries, error: null };
+  return { date, summary, entries: exercise.entries, workoutPlan, error: null };
 }
 
 export function useDailyActivity(date, refreshKey = 0) {
@@ -54,6 +56,7 @@ export function useDailyActivity(date, refreshKey = 0) {
     loading: day.date !== date,
     saving,
     summary: day.summary,
+    workoutPlan: day.workoutPlan,
     entries: day.entries,
     error: day.error,
     addExercise,

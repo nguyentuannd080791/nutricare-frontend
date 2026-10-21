@@ -119,6 +119,7 @@ export default function App() {
   // Chống bấm đúp: khoá theo (ngày, bữa) bằng ref để không dính stale closure.
   const mealDebounceTimers = useRef(new Map());
   const [mealSyncVersion, setMealSyncVersion] = useState(0);
+  const [activitySyncVersion, setActivitySyncVersion] = useState(0);
 
   // Tick "đã ăn": cập nhật ngay trên máy (lạc quan 0ms), không bao giờ khoá nút.
   // Áp dụng debounce ngắn (350ms) để gom các lần bấm liên tiếp, chỉ gửi trạng
@@ -154,6 +155,7 @@ export default function App() {
         toggleMeal(user.id, dateKeyStr, mealSlot, planId);
         reportError(e);
       } finally {
+        await reload("summary");
         setMealSyncVersion((version) => version + 1);
       }
     }, 350);
@@ -394,10 +396,16 @@ export default function App() {
     return (
       <PlanViewScreen
         plan={activePlan}
+        user={user}
+        userData={userData}
+        activeTarget={activeTarget}
         onBack={() => nav.goToTab("home")}
         onRebuild={() => nav.openOverlay("plan-create")}
         onViewHistory={() => nav.openOverlay("plan-history")}
         onSwap={handleSwap}
+        onToggleMeal={handleToggleMeal}
+        mealSyncVersion={mealSyncVersion}
+        onCreatePlan={handleCreatePlan}
       />
     );
   }
@@ -477,6 +485,12 @@ export default function App() {
             onBack={close}
             showToast={showToast}
             reportError={reportError}
+            user={user}
+            userData={userData}
+            onActivityChange={() => {
+              reload("workoutPlan", "summary");
+              setActivitySyncVersion((v) => v + 1);
+            }}
           />
         );
       case "admin-dashboard":
@@ -607,6 +621,7 @@ export default function App() {
             userData={userData}
             onQuickAction={nav.handleQuickAction}
             mealSyncVersion={mealSyncVersion}
+            activitySyncVersion={activitySyncVersion}
             onToggleMeal={handleToggleMeal}
           />
         )}
@@ -670,9 +685,11 @@ export default function App() {
         wideContent={
           isInApp &&
           !user.isAdmin &&
-          ((!nav.overlay && (nav.tab === "home" || nav.tab === "foods")) ||
+          ((!nav.overlay && (nav.tab === "home" || nav.tab === "foods" || nav.tab === "plan")) ||
             nav.overlay === "bmi" ||
-            nav.overlay === "conditions")
+            nav.overlay === "conditions" ||
+            nav.overlay === "plan-history" ||
+            nav.overlay === "exercise")
         }
       >
         {renderContent()}

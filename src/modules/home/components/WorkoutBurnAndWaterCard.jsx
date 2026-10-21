@@ -39,7 +39,7 @@ export default function WorkoutBurnAndWaterCard({
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#EA580C]">
             <Flame className="w-4 h-4" />
-            {restDay ? "Vận động ngày nghỉ" : "Mở khóa từ Tập luyện"}
+            {restDay ? "Vận động ngày nghỉ" : "Tập luyện"}
           </span>
           <span className="text-xs font-semibold text-[#0F172A]/60">
             {activeMinutes} phút • {restDay ? "Nhẹ nhàng" : `${burnPercent}%`}
@@ -53,15 +53,6 @@ export default function WorkoutBurnAndWaterCard({
               / {plannedBurnKcal} calo
             </span>
           </span>
-          {onOpenExercise && (
-            <button
-              type="button"
-              onClick={onOpenExercise}
-              className="text-[11px] font-bold text-[#EA580C] hover:underline cursor-pointer"
-            >
-              Xem bài tập →
-            </button>
-          )}
         </div>
 
         <div className="w-full h-2 rounded-full bg-[#F0F8F6] overflow-hidden">

@@ -58,7 +58,7 @@ export class CalorieBalance {
     if (surplus > 0) {
       return {
         type: "warning_surplus",
-        badge: `Dư +${surplus} calo • Cần tập thêm`,
+        badge: null,
       };
     }
 
@@ -71,7 +71,7 @@ export class CalorieBalance {
 
     return {
       type: "on_track",
-      badge: unburned > 0 ? `Tập để mở khóa +${unburned} calo` : "Đang đúng lộ trình",
+      badge: "Đang đúng lộ trình",
     };
   }
 }

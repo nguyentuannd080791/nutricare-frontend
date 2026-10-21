@@ -20,7 +20,14 @@ const SECTION_CARD = "rounded-3xl bg-white border border-[#DCEEE7] p-5 sm:p-7 sh
  * Tính toán số liệu miền nghiệp vụ ở tầng domain; mỗi sub-component chỉ chuyên trách hiển thị.
  * Đồng bộ toàn diện UI từ HealthDashboardPage của test-ui.
  */
-export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAction, onToggleMeal }) {
+export default function HomeScreen({
+  user,
+  userData,
+  mealSyncVersion = 0,
+  activitySyncVersion = 0,
+  onQuickAction,
+  onToggleMeal,
+}) {
   const [mobileSectionTab, setMobileSectionTab] = useState("all");
 
   const latestBMI = userData.bmiRecords[0];
@@ -34,11 +41,19 @@ export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAct
   const todayProgress = activePlan && rawProgress?.planId === activePlan.id ? rawProgress : {};
   const dayProgress = calcDayProgress(todayPlanDay, todayProgress);
 
-  const { summary, workoutPlan, water, streak, restDay, error, toggleWorkout, setWaterCups } = useHomeActivity(
-    todayKey,
-    mealSyncVersion,
-    userData
-  );
+  const syncVersion = `${mealSyncVersion}-${activitySyncVersion}`;
+
+  const {
+    summary,
+    workoutPlan,
+    water,
+    streak,
+    restDay,
+    error,
+    toggleWorkout,
+    removeExtraWorkout,
+    setWaterCups,
+  } = useHomeActivity(todayKey, syncVersion, userData);
 
   const calorieBalance = buildCalorieBalance({
     summary,
@@ -49,25 +64,25 @@ export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAct
 
   const macros = dayProgress
     ? {
-        protein: dayProgress.consumedMacros.protein_g,
-        carbs: dayProgress.consumedMacros.carb_g,
-        fat: dayProgress.consumedMacros.fat_g,
-      }
+      protein: dayProgress.consumedMacros.protein_g,
+      carbs: dayProgress.consumedMacros.carb_g,
+      fat: dayProgress.consumedMacros.fat_g,
+    }
     : { protein: 0, carbs: 0, fat: 0 };
 
   const plannedMacros = dayProgress
     ? {
-        protein: dayProgress.plannedMacros.protein_g,
-        carbs: dayProgress.plannedMacros.carb_g,
-        fat: dayProgress.plannedMacros.fat_g,
-      }
+      protein: dayProgress.plannedMacros.protein_g,
+      carbs: dayProgress.plannedMacros.carb_g,
+      fat: dayProgress.plannedMacros.fat_g,
+    }
     : activeTarget
-    ? {
+      ? {
         protein: activeTarget.protein || 0,
         carbs: activeTarget.carbs || 0,
         fat: activeTarget.fat || 0,
       }
-    : { protein: 0, carbs: 0, fat: 0 };
+      : { protein: 0, carbs: 0, fat: 0 };
 
   return (
     <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-5 pb-10 bg-bg">
@@ -119,11 +134,10 @@ export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAct
               key={tab.id}
               type="button"
               onClick={() => setMobileSectionTab(tab.id)}
-              className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                mobileSectionTab === tab.id
+              className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${mobileSectionTab === tab.id
                   ? "bg-[#059669] text-white shadow-xs"
                   : "text-[#0F172A]/60 hover:text-[#0F172A]"
-              }`}
+                }`}
             >
               {tab.label}
             </button>
@@ -151,8 +165,8 @@ export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAct
                     title="Chưa có mục tiêu dinh dưỡng"
                     desc="Tạo mục tiêu dinh dưỡng để chúng tôi tính lượng calo & dưỡng chất phù hợp mỗi ngày cho bạn."
                     action={
-                      <Button full icon={Plus} onPress={() => onQuickAction("target-create")}>
-                        Tạo mục tiêu ngay
+                      <Button full onPress={() => onQuickAction("target-create")}>
+                        Tạo ngay
                       </Button>
                     }
                   />
@@ -173,13 +187,13 @@ export default function HomeScreen({ user, userData, mealSyncVersion, onQuickAct
           </div>
 
           <div
-            className={`lg:col-span-5 space-y-6 ${
-              mobileSectionTab === "meals" ? "hidden lg:block" : "block"
-            }`}
+            className={`lg:col-span-5 space-y-6 ${mobileSectionTab === "meals" ? "hidden lg:block" : "block"
+              }`}
           >
             <WorkoutChecklist
               workoutPlan={workoutPlan}
               onToggleWorkout={toggleWorkout}
+              onRemoveExtraWorkout={removeExtraWorkout}
               onExploreWorkouts={() => onQuickAction("exercise")}
             />
           </div>

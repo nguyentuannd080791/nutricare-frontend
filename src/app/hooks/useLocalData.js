@@ -30,8 +30,19 @@ export function useLocalData() {
   const toggleMeal = useCallback(
     (userId, dateKeyStr, mealSlot, planId) => {
       setLocalData((prev) => {
-        const dayEntry = prev.progress[dateKeyStr]?.planId === planId ? prev.progress[dateKeyStr] : { planId };
-        const next = { ...prev, progress: { ...prev.progress, [dateKeyStr]: { ...dayEntry, [mealSlot]: !dayEntry[mealSlot] } } };
+        const currentData = prev || { progress: {}, reminders: {} };
+        const progress = currentData.progress || {};
+        const dayEntry = progress[dateKeyStr]?.planId === planId ? progress[dateKeyStr] : { planId };
+        const next = {
+          ...currentData,
+          progress: {
+            ...progress,
+            [dateKeyStr]: {
+              ...dayEntry,
+              [mealSlot]: !dayEntry[mealSlot],
+            },
+          },
+        };
         saveLocalData(userId, next);
         return next;
       });
