@@ -1,5 +1,14 @@
 import React, { useState, useMemo } from "react";
-import { Search, X, Activity, Dumbbell, Sparkles, HeartPulse, CheckCircle2, Star } from "lucide-react";
+import {
+  Search,
+  X,
+  Activity,
+  Dumbbell,
+  Sparkles,
+  HeartPulse,
+  CheckCircle2,
+  Star,
+} from "lucide-react";
 import { COLORS } from "../../../assets/theme/colors";
 import { ScreenHeader } from "../../../shared/components/ui";
 import { dateKey } from "../../../shared/domain/planCycle";
@@ -22,13 +31,19 @@ export default function ExerciseScreen({
   userData,
   onActivityChange,
 }) {
-  const { loading, saving, entries, workoutPlan, error, addExercise, removeExercise } =
-    useDailyActivity(dateKey());
+  const {
+    loading,
+    saving,
+    entries,
+    workoutPlan,
+    error,
+    addExercise,
+    removeExercise,
+  } = useDailyActivity(dateKey());
   const catalog = useExerciseCatalog();
 
   // Xác định cân nặng thực tế của người dùng để cá nhân hóa calo
-  const weightKg =
-    userData?.bmiRecords?.[0]?.weightKg || user?.weightKg || 65;
+  const weightKg = userData?.bmiRecords?.[0]?.weightKg || user?.weightKg || 65;
 
   // State bộ lọc và tìm kiếm
   const [query, setQuery] = useState("");
@@ -54,7 +69,10 @@ export default function ExerciseScreen({
     if (planExerciseIds.size > 0) {
       return [
         { id: "all", label: "Tất cả bài tập" },
-        { id: "today_plan", label: `⭐ Kế hoạch hôm nay (${planExerciseIds.size})` },
+        {
+          id: "today_plan",
+          label: `⭐ Kế hoạch hôm nay (${planExerciseIds.size})`,
+        },
         ...WORKOUT_CATEGORIES.filter((c) => c.id !== "all"),
       ];
     }
@@ -102,17 +120,20 @@ export default function ExerciseScreen({
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader
-        title="Thư viện bài tập"
-        onBack={onBack}
-      />
+    <div
+      className="flex-1 flex flex-col min-h-0"
+      style={{ backgroundColor: COLORS.bg }}
+    >
+      <ScreenHeader title="Thư viện bài tập" onBack={onBack} />
 
       <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 pb-28 md:pb-10">
         <div className="max-w-[1200px] mx-auto">
           {/* Lỗi hệ thống nếu có */}
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-[13px] font-medium" role="alert">
+            <div
+              className="mb-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-[13px] font-medium"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -132,24 +153,6 @@ export default function ExerciseScreen({
 
             {/* CỘT CHÍNH (Desktop 8 cột): Thanh công cụ tìm kiếm, danh mục & Lưới bài tập */}
             <div className="lg:col-span-8 space-y-4">
-              {/* Banner giới thiệu tinh giản */}
-              <div className="rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 p-5 text-white shadow-sm flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <HeartPulse size={18} className="text-emerald-200" />
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-emerald-100">
-                      Vận động thông minh
-                    </span>
-                  </div>
-                  <h2 className="text-[18px] sm:text-[20px] font-extrabold m-0 leading-tight">
-                    Thư viện bài tập theo thể trạng
-                  </h2>
-                  <p className="text-[12.5px] sm:text-[13px] text-emerald-100/90 m-0 mt-1 max-w-xl">
-                    Ước tính tiêu hao theo cân nặng <strong className="text-white font-bold">{weightKg} kg</strong> của bạn. Chọn bài tập và ghi nhận chỉ với 1 chạm.
-                  </p>
-                </div>
-              </div>
-
               {/* Thanh tìm kiếm & Lọc danh mục */}
               <div className="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-sm">
                 {/* Search Bar */}
@@ -192,8 +195,8 @@ export default function ExerciseScreen({
                               ? "bg-amber-500 text-white shadow-sm shadow-amber-500/30"
                               : "bg-primary text-white shadow-sm shadow-primary/25"
                             : isPlanTab
-                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20"
-                            : "bg-muted/80 hover:bg-muted text-descGray hover:text-fg border border-border/50"
+                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/20"
+                              : "bg-muted/80 hover:bg-muted text-descGray hover:text-fg border border-border/50"
                         }`}
                       >
                         {cat.label}
@@ -207,7 +210,9 @@ export default function ExerciseScreen({
               <div className="flex items-center justify-between px-1">
                 <span className="text-[13px] font-semibold text-descGray">
                   {filteredWorkouts.length} bài tập phù hợp
-                  {selectedCategory === "today_plan" ? " trong kế hoạch hôm nay" : ""}
+                  {selectedCategory === "today_plan"
+                    ? " trong kế hoạch hôm nay"
+                    : ""}
                 </span>
                 {selectedCategory !== "all" && (
                   <button
@@ -230,7 +235,8 @@ export default function ExerciseScreen({
                     Không tìm thấy bài tập nào
                   </h4>
                   <p className="text-[13px] text-descGray m-0 max-w-sm mx-auto">
-                    Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục hiện tại.
+                    Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục hiện
+                    tại.
                   </p>
                 </div>
               ) : (
@@ -267,13 +273,17 @@ export default function ExerciseScreen({
                 </div>
                 <ul className="m-0 p-0 pl-4 list-disc text-[12px] text-descGray space-y-1.5 leading-relaxed">
                   <li>
-                    Kết hợp <strong>Cardio đốt mỡ</strong> và <strong>Kháng lực</strong> giúp cơ thể săn chắc và giữ cơ nạc.
+                    Kết hợp <strong>Cardio đốt mỡ</strong> và{" "}
+                    <strong>Kháng lực</strong> giúp cơ thể săn chắc và giữ cơ
+                    nạc.
                   </li>
                   <li>
-                    Uống 200 - 300ml nước trước khi tập 15 phút để đảm bảo cân bằng điện giải.
+                    Uống 200 - 300ml nước trước khi tập 15 phút để đảm bảo cân
+                    bằng điện giải.
                   </li>
                   <li>
-                    Ăn nhẹ với một quả chuối hoặc sữa hạt trước buổi tập 30 - 45 phút nếu cảm thấy đói.
+                    Ăn nhẹ với một quả chuối hoặc sữa hạt trước buổi tập 30 - 45
+                    phút nếu cảm thấy đói.
                   </li>
                 </ul>
               </div>
