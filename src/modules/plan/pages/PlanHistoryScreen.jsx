@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ClipboardList, Target } from "lucide-react";
+import { ClipboardList, Target, History } from "lucide-react";
 import { EmptyState, ScreenHeader } from "../../../shared/components/ui";
 import { buildDietHistoryModel } from "../domain/dietHistoryDomain";
 import CycleMonthTabs from "../components/CycleMonthTabs";
@@ -38,10 +38,15 @@ export default function PlanHistoryScreen({ data, onBack }) {
   const activeWeek = currentCycle?.weeks?.[safeWeekIndex];
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-bg overflow-hidden">
-      <ScreenHeader title="Lịch sử chế độ ăn" onBack={onBack} />
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Lịch Sử Chế Độ Ăn & Thực Đơn"
+        icon={History}
+        subtitle="Theo dõi tiến độ tuân thủ thực đơn qua các chu kỳ"
+        onBack={onBack}
+      />
 
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 pb-16 [scrollbar-width:thin] [scrollbar-color:#DCEEE7_transparent]">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
         {!currentCycle ? (
           <div className="max-w-md mx-auto mt-10">
             <EmptyState
@@ -154,7 +159,7 @@ export default function PlanHistoryScreen({ data, onBack }) {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

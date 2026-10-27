@@ -1,5 +1,5 @@
 import React from "react";
-import { Edit2 } from "lucide-react";
+import { Edit2, Target } from "lucide-react";
 import { COLORS } from "../../../assets/theme/colors";
 import { Card, Button, ScreenHeader } from "../../../shared/components/ui";
 import { GOALS, ACTIVITY_LEVELS } from "../../../shared/domain/constants";
@@ -14,9 +14,14 @@ export default function TargetDetailScreen({ data, onBack, onEdit }) {
   const activity = ACTIVITY_LEVELS.find((a) => a.id === active.activityId);
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Mục tiêu dinh dưỡng" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-5" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Mục Tiêu Dinh Dưỡng"
+        icon={Target}
+        subtitle="Thông số calo và các chất dinh dưỡng đa lượng"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-5 pb-24">
         <Card className="p-5" style={{ backgroundColor: COLORS.primary }}>
           <span className="block text-[12.5px]" style={{ color: "rgba(255,255,255,0.8)" }}>Mục tiêu hiện tại</span>
           <span className="block text-[26px] font-extrabold text-white mt-1">{active.calories} kcal/ngày</span>
@@ -40,7 +45,7 @@ export default function TargetDetailScreen({ data, onBack, onEdit }) {
         <Button full variant="outline" icon={Edit2} onPress={onEdit}>Thay đổi mục tiêu / hoạt động</Button>
 
         <TargetHistoryList history={history} />
-      </div>
+      </main>
     </div>
   );
 }

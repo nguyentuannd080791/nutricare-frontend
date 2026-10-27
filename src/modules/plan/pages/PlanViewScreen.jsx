@@ -10,6 +10,7 @@ import PlanOverviewCard from "../components/PlanOverviewCard";
 import MealItemCard from "../components/MealItemCard";
 import SwapMealModal from "../components/SwapMealModal";
 import RebuildPlanModal from "../components/RebuildPlanModal";
+import { ScreenHeader } from "../../../shared/components/ui";
 
 /**
  * Màn hình Kế hoạch Thực đơn (SOLID: SRP, OCP, Clean Architecture)
@@ -194,7 +195,7 @@ export default function PlanViewScreen({
     if (onSwap) {
       await onSwap({
         planId: planViewModel.id,
-        dayIndex: activeDay.dayIndex,
+        dayIndex: activeDay.cycleDayIndex || activeDay.dayIndex + 1,
         mealSlot: slotId,
         chooseDishId: chosenDish.id || chosenDish.dishId,
       });
@@ -218,50 +219,42 @@ export default function PlanViewScreen({
   };
 
   return (
-    <div className="w-full flex-1 min-h-0 overflow-y-auto flex flex-col p-4 sm:p-6 lg:p-8 space-y-6 pb-28 sm:pb-12 [scrollbar-width:thin] [scrollbar-color:#DCEEE7_transparent]">
-      {/* 1. TOP BAR: Tiêu đề + Thông tin chu kỳ + Nút Lịch sử & Xây dựng lại thực đơn */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DCEEE7]">
-        <div>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      {/* 1. TOP BAR CHUẨN HOÁ: ScreenHeader */}
+      <ScreenHeader
+        icon={CalendarDays}
+        title="Thực Đơn Dinh Dưỡng Cá Nhân Hóa"
+        badgeText={`Chu kỳ ${planViewModel.cycleDays} ngày • ${planViewModel.durationMonths} tháng`}
+        subtitle="Kế hoạch phân bổ calo & vi chất theo từng ngày trong chu kỳ"
+        right={
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-xl bg-[#059669] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs">
-              <CalendarDays className="w-4 h-4" />
-              Kế hoạch thực đơn
-            </span>
-            <span className="text-xs font-semibold text-[#059669] bg-[#ECFDF5] px-2.5 py-1 rounded-xl border border-[#DCEEE7]">
-              Chu kỳ {planViewModel.cycleDays} ngày • {planViewModel.durationMonths} tháng
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight mt-1.5">
-            Thực Đơn Dinh Dưỡng Cá Nhân Hóa
-          </h1>
-        </div>
+            {onViewHistory && (
+              <button
+                type="button"
+                onClick={onViewHistory}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-[#DCEEE7] hover:border-[#059669]/40 text-[#0F172A]/70 hover:text-[#059669] font-bold text-xs shadow-2xs transition-all cursor-pointer"
+                title="Xem lịch sử các thực đơn trước"
+              >
+                <History className="w-4 h-4" />
+                <span className="hidden sm:inline">Lịch sử</span>
+              </button>
+            )}
 
-        {/* Cụm nút hành động: Lịch sử thực đơn + Tái tạo thực đơn */}
-        <div className="flex items-center gap-2">
-          {onViewHistory && (
             <button
               type="button"
-              onClick={onViewHistory}
-              className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white border border-[#DCEEE7] hover:border-[#059669]/40 text-[#0F172A]/70 hover:text-[#059669] font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-              title="Xem lịch sử các thực đơn trước"
+              onClick={() => setIsRebuildOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#059669] text-white hover:bg-[#047857] font-bold text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
             >
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">Lịch sử</span>
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden sm:inline">Xây dựng lại thực đơn</span>
+              <span className="sm:hidden">Tạo lại</span>
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setIsRebuildOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[#059669] text-white hover:bg-[#047857] font-bold text-xs sm:text-sm shadow-sm active:scale-95 transition-all cursor-pointer"
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>Xây dựng lại thực đơn</span>
-          </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* 2. MAIN CONTENT: Bố cục Responsive 12 cột */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* CỘT TRÁI (lg:col-span-4): Tổng quan Mục tiêu & Chu kỳ */}
         <div className="lg:col-span-4">
@@ -306,6 +299,7 @@ export default function PlanViewScreen({
           </div>
         </div>
       </div>
+      </main>
 
       {/* 3. MODALS */}
       {/* Modal đổi món: Giới hạn đúng 3 lựa chọn cùng hệ, khóa khi đã ăn */}

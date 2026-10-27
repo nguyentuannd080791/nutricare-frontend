@@ -21,9 +21,14 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
   const activePlanObj = PLANS.find((p) => p.id === selectedPlan);
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Premium" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Gói Hội Viên Premium"
+        icon={Crown}
+        subtitle="Mở khoá toàn bộ tính năng cao cấp không giới hạn"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
         <Card className="flex flex-col items-center p-6 gap-2" style={{ backgroundColor: COLORS.primary }}>
           <Crown size={32} color="#fff" />
           <span className="text-[17px] font-extrabold text-white text-center">{user.isPremium ? "Bạn là hội viên Premium" : "Nâng cấp Premium"}</span>
@@ -59,7 +64,7 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
             </Button>
           )}
         </div>
-      </div>
+      </main>
 
       <ModalSheet open={confirmCancel} onClose={() => setConfirmCancel(false)} title="Huỷ Premium">
         <p className="text-[14px] text-[#475569] mb-5 leading-5">Bạn sẽ quay lại giới hạn {user.limits.scan} lượt quét món ăn miễn phí. Tiếp tục?</p>

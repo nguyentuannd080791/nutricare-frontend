@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   HelpCircle,
   Ban,
-  ArrowLeft,
   ShieldCheck,
   AlertTriangle,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import {
 import ConditionCard from "../components/ConditionCard";
 import PresetCatalogDropdown from "../components/PresetCatalogDropdown";
 import ConditionEditModal from "../components/ConditionEditModal";
+import { ScreenHeader } from "../../../shared/components/ui";
 
 const CONDITION_NOTES_KEY = "nutricare_condition_notes_v1";
 
@@ -177,42 +177,14 @@ export default function ConditionsScreen({
   return (
     <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
       {/* HEADER CỐ ĐỊNH */}
-      <header className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-md border-b border-[#DCEEE7] px-4 py-3 sm:px-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {onBack ? (
-              <button
-                type="button"
-                onClick={onBack}
-                className="p-2 rounded-xl bg-[#F0F8F6] hover:bg-[#ECFDF5] text-[#059669] border border-[#DCEEE7] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-                title="Quay lại"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Quay lại</span>
-              </button>
-            ) : (
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#059669] to-[#10B981] text-white flex items-center justify-center shadow-xs">
-                <HeartPulse className="w-5 h-5" />
-              </div>
-            )}
-
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold text-[#0F172A] tracking-tight">
-                  Hồ Sơ Bệnh Nền, Dị Ứng & Chỉ Định
-                </h1>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
-                  {conditions.length} mục đã lưu
-                </span>
-              </div>
-              <p className="text-[11px] text-[#0F172A]/55 font-medium">
-                Hệ thống tự động lọc món ăn và cảnh báo dựa trên hồ sơ này
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <ScreenHeader
+        onBack={onBack}
+        icon={HeartPulse}
+        title="Hồ Sơ Bệnh Nền, Dị Ứng & Chỉ Định"
+        badgeText={`${conditions.length} mục đã lưu`}
+        badgeIcon={ShieldCheck}
+        subtitle="Hệ thống tự động lọc món ăn và cảnh báo dựa trên hồ sơ này"
+      />
 
       {/* NỘI DUNG CHÍNH (BỐ CỤC 2 CỘT 5/7 TRÊN DESKTOP) */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">

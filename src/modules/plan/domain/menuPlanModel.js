@@ -1,7 +1,7 @@
 // ============================================================================
 // DOMAIN LAYER: VALUE OBJECTS, SLOTS & DISH REPOSITORY (SOLID: SRP, CLEAN CODE)
 // ============================================================================
-import { dateKey } from "../../../shared/domain/planCycle";
+import { dateKey, cycleIndexForDate } from "../../../shared/domain/planCycle";
 
 export const MEAL_SLOT_CONFIGS = [
   {
@@ -491,10 +491,12 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
   const days = [];
 
   for (let dayIdx = 0; dayIdx < cycleDays; dayIdx++) {
-    const rawDay = plan?.days?.[dayIdx] || null;
     const dayDate = new Date(startDate);
     dayDate.setDate(dayDate.getDate() + dayIdx);
     dayDate.setHours(0, 0, 0, 0);
+
+    const cycleIdx = plan ? cycleIndexForDate(plan, dayDate) : dayIdx;
+    const rawDay = plan?.days?.[cycleIdx] ?? plan?.days?.[dayIdx] ?? null;
 
     const diffDays = Math.round((dayDate.getTime() - nowZero.getTime()) / 86400000);
     const isToday = diffDays === 0;
@@ -513,8 +515,11 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
         (m) => normalizeSlotId(m.mealSlot || m.slotId) === slotConfig.id
       );
 
-      // Trạng thái đã ăn: kiểm tra trong userProgress[dateKeyStr] hoặc local state
-      const progressEaten = userProgress?.[dateKeyStr]?.[slotConfig.id];
+      // Trạng thái đã ăn: kiểm tra trong userProgress[dateKeyStr] khớp đúng thực đơn hiện tại
+      const dayProgressEntry = userProgress?.[dateKeyStr];
+      const isMatchingPlan =
+        !plan?.id || !dayProgressEntry?.planId || dayProgressEntry.planId === plan.id;
+      const progressEaten = isMatchingPlan ? dayProgressEntry?.[slotConfig.id] : false;
       const completed = Boolean(progressEaten);
 
       // Thông tin món ăn
@@ -566,7 +571,8 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
     const dayTotalFat = meals.reduce((s, m) => s + m.dish.fat, 0);
 
     days.push({
-      dayIndex: rawDay?.dayIndex ?? dayIdx,
+      dayIndex: dayIdx,
+      cycleDayIndex: rawDay?.dayIndex ?? (cycleIdx + 1),
       dayNumber: dayIdx + 1,
       title: `Ngày ${dayIdx + 1}`,
       date: dayDate.toISOString(),

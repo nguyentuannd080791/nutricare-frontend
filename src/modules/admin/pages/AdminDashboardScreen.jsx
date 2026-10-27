@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { COLORS } from "../../../assets/theme/colors";
 import { Users } from "lucide-react";
 import { ScreenHeader, Button } from "../../../shared/components/ui";
 import SegmentedControl from "../../../shared/components/SegmentedControl";
@@ -25,9 +24,10 @@ export default function AdminDashboardScreen({ onBack, onGoUsers }) {
   const { loading, data, error } = useAdminStats(days);
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
       <ScreenHeader
-        title="Thống kê quản trị"
+        title="Thống Kê Quản Trị"
+        subtitle="Tổng quan người dùng, tỉ lệ tuân thủ thực đơn & doanh thu"
         onBack={onBack}
         right={
           onGoUsers ? (
@@ -42,7 +42,7 @@ export default function AdminDashboardScreen({ onBack, onGoUsers }) {
           ) : null
         }
       />
-      <div className="flex-1 overflow-y-auto px-5" style={{ paddingBottom: 40 }}>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
         <SegmentedControl label="Khoảng thời gian" options={RANGES} value={range} onChange={setRange} />
 
         {loading && <p className="mt-6 text-slate-600" role="status">Đang tải số liệu…</p>}
@@ -80,7 +80,7 @@ export default function AdminDashboardScreen({ onBack, onGoUsers }) {
             </div>
           </>
         )}
-      </div>
+      </main>
     </div>
   );
 }

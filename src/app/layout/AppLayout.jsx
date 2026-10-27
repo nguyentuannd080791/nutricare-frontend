@@ -11,14 +11,14 @@ import DesktopLayout from "./DesktopLayout";
  * máy tính Sidebar vẫn hiện để người dùng chuyển mục bất cứ lúc nào. `wideContent`: màn cần nhiều cột (Trang chủ)
  * được mở rộng vùng nội dung trên máy tính.
  */
-export default function AppLayout({ navigation, hideMobileNav, fullWidth, wideContent, children }) {
+export default function AppLayout({ navigation, user, hideMobileNav, fullWidth, wideContent, children }) {
   const isDesktop = useIsDesktop();
   if (isDesktop && fullWidth) {
     return <div className="h-screen w-full bg-bg flex flex-col overflow-hidden">{children}</div>;
   }
   if (isDesktop && navigation) {
     return (
-      <DesktopLayout navigation={navigation} wide={wideContent}>
+      <DesktopLayout navigation={navigation} user={user}>
         {children}
       </DesktopLayout>
     );

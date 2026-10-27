@@ -6,13 +6,13 @@ import {
   ShieldCheck,
   Utensils,
   Apple,
-  ArrowLeft,
   X,
   Sparkles,
 } from "lucide-react";
 import { useFoodsCatalog } from "../hooks/useFoodsCatalog";
 import FoodCard from "../components/FoodCard";
 import NutritionInspector from "../components/NutritionInspector";
+import { ScreenHeader } from "../../../shared/components/ui";
 
 /**
  * Màn hình Tra Cứu Danh Sách Món Ăn & Thực Phẩm (SOLID: Open/Closed & SRP)
@@ -55,56 +55,26 @@ export default function FoodsScreen({
   return (
     <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
       {/* HEADER CỐ ĐỊNH */}
-      <header className="sticky top-0 z-20 shrink-0 bg-white/95 backdrop-blur-md border-b border-[#DCEEE7] px-4 py-3.5 sm:px-8 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          {onBack ? (
+      <ScreenHeader
+        onBack={onBack}
+        icon={isDish ? Utensils : Apple}
+        title="Danh Sách Món Ăn & Thực Phẩm"
+        badgeText="Viện Dinh Dưỡng Quốc Gia"
+        badgeIcon={Sparkles}
+        subtitle="Tra cứu chỉ số dinh dưỡng & cảnh báo chống chỉ định y tế"
+        right={
+          typeof onNavigateToConditions === "function" ? (
             <button
               type="button"
-              onClick={onBack}
-              className="p-2 rounded-xl bg-[#F0F8F6] hover:bg-[#ECFDF5] text-[#059669] border border-[#DCEEE7] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-              title="Quay lại"
+              onClick={onNavigateToConditions}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-xs font-bold hover:bg-[#D1FAE5] transition-colors cursor-pointer shadow-2xs shrink-0"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Quay lại</span>
+              <ShieldCheck className="w-4 h-4 text-[#059669]" />
+              <span className="hidden sm:inline">Hồ sơ bệnh lý</span>
             </button>
-          ) : (
-            <div className="w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-xs shrink-0">
-              {isDish ? (
-                <Utensils className="w-5 h-5" />
-              ) : (
-                <Apple className="w-5 h-5" />
-              )}
-            </div>
-          )}
-
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-extrabold text-[#0F172A] tracking-tight">
-                Danh Sách Món Ăn & Thực Phẩm
-              </h1>
-              <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
-                <Sparkles className="w-3 h-3 text-[#EA580C]" />
-                Viện Dinh Dưỡng Quốc Gia
-              </span>
-            </div>
-            <p className="text-xs text-[#0F172A]/55 mt-0.5 font-medium">
-              Tra cứu chỉ số dinh dưỡng & cảnh báo chống chỉ định y tế
-            </p>
-          </div>
-        </div>
-
-        {/* NÚT TRUY CẬP HỒ SƠ BỆNH LÝ */}
-        {typeof onNavigateToConditions === "function" && (
-          <button
-            type="button"
-            onClick={onNavigateToConditions}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] text-xs font-bold hover:bg-[#D1FAE5] transition-colors cursor-pointer shadow-2xs shrink-0"
-          >
-            <ShieldCheck className="w-4 h-4 text-[#059669]" />
-            <span className="hidden sm:inline">Hồ sơ bệnh lý</span>
-          </button>
-        )}
-      </header>
+          ) : null
+        }
+      />
 
       {/* WORKSPACE CHÍNH */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-5 pb-24">

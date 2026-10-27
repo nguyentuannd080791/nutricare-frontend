@@ -120,14 +120,15 @@ export default function ExerciseScreen({
   }
 
   return (
-    <div
-      className="flex-1 flex flex-col min-h-0"
-      style={{ backgroundColor: COLORS.bg }}
-    >
-      <ScreenHeader title="Thư viện bài tập" onBack={onBack} />
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Thư Viện Bài Tập & Vận Động"
+        icon={Dumbbell}
+        subtitle="Theo dõi calo tiêu hao & bài tập trong ngày"
+        onBack={onBack}
+      />
 
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 pb-28 md:pb-10">
-        <div className="max-w-[1200px] mx-auto">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
           {/* Lỗi hệ thống nếu có */}
           {error && (
             <div
@@ -289,8 +290,7 @@ export default function ExerciseScreen({
               </div>
             </div>
           </div>
-        </div>
-      </div>
+      </main>
 
       {/* Modal ghi nhận bài tập nhanh */}
       <QuickLogExerciseModal

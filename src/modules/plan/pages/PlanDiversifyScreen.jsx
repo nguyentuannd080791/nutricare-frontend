@@ -9,9 +9,14 @@ export default function PlanDiversifyScreen({ plan, user, onBack, onGoUpgrade, o
   const { phase, proposal, aiPlanLimit, selectionsFromProposal } = usePlanDiversification({ plan, user, onProposed });
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Đa dạng hoá bằng AI" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Đa Dạng Hoá Thực Đơn Bằng AI"
+        icon={Sparkles}
+        subtitle="Tối ưu và làm phong phú món ăn trong chu kỳ"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
         {phase === "limit" && (
           <div>
             <div className="flex flex-row gap-2 rounded-xl p-[14px] mb-3" style={{ backgroundColor: "#FFF7ED" }}>
@@ -62,7 +67,7 @@ export default function PlanDiversifyScreen({ plan, user, onBack, onGoUpgrade, o
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

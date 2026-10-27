@@ -29,11 +29,16 @@ export default function TargetCreateScreen({ data, onBack, onCreate }) {
 
   if (!hasBMI) {
     return (
-      <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-        <ScreenHeader title="Tạo mục tiêu" onBack={onBack} />
-        <div className="px-5">
+      <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+        <ScreenHeader
+          title="Tạo Mục Tiêu Dinh Dưỡng"
+          icon={Scale}
+          subtitle="Cần chỉ số BMI ban đầu trước khi tạo mục tiêu"
+          onBack={onBack}
+        />
+        <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8">
           <EmptyState icon={Scale} title="Cần chỉ số BMI trước" desc="Vui lòng hoàn tất khai báo chỉ số BMI ban đầu trước khi tạo mục tiêu dinh dưỡng." />
-        </div>
+        </main>
       </div>
     );
   }
@@ -46,9 +51,14 @@ export default function TargetCreateScreen({ data, onBack, onCreate }) {
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Tạo mục tiêu dinh dưỡng" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-5" style={{ paddingBottom: 120 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Tạo Mục Tiêu Dinh Dưỡng"
+        icon={Scale}
+        subtitle="Xác định mục tiêu cân nặng và mức độ vận động"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-5 pb-32">
         <div>
           <span className="block text-[13px] font-bold text-fg mb-[10px]">Bạn muốn đạt được điều gì?</span>
           {GOALS.map((g) => (
@@ -71,7 +81,7 @@ export default function TargetCreateScreen({ data, onBack, onCreate }) {
 
         {previewError && <span className="block text-destructive text-[13px] font-medium">{previewError}</span>}
         {preview && <GoalPreviewCard preview={preview} />}
-      </div>
+      </main>
 
       <FixedActionBar>
         <Button full busy={submitting} disabled={!preview || !durationMonths || settledChangeKg !== targetChangeKg} onPress={handleSubmit}>Xác nhận tạo mục tiêu</Button>

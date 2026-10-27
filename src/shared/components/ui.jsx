@@ -284,24 +284,63 @@ export function EmptyState({ icon: Icon, title, desc, action }) {
   );
 }
 
-export function ScreenHeader({ title, onBack, right }) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  badgeText,
+  badgeIcon: BadgeIcon,
+  badge,
+  icon: Icon,
+  onBack,
+  right,
+  className = "",
+}) {
   return (
-    <div className="flex flex-row items-center justify-between px-5 pt-5 pb-3">
-      <div className="flex flex-row items-center gap-[10px]">
+    <header
+      className={`sticky top-0 z-20 shrink-0 bg-white/95 backdrop-blur-md border-b border-[#DCEEE7] px-4 py-3.5 sm:px-8 flex items-center justify-between gap-4 ${className}`}
+    >
+      <div className="flex items-center gap-3 min-w-0">
         {onBack ? (
           <button
             type="button"
             onClick={onBack}
-            className="p-1 -ml-1"
+            className="p-2 rounded-xl bg-[#F0F8F6] hover:bg-[#ECFDF5] text-[#059669] border border-[#DCEEE7] transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer shrink-0"
+            title="Quay lại"
             aria-label="Quay lại"
           >
-            <ArrowLeft size={22} color={COLORS.fg} />
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Quay lại</span>
           </button>
+        ) : Icon ? (
+          <div className="w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-xs shrink-0">
+            {React.isValidElement(Icon) ? Icon : <Icon className="w-5 h-5" />}
+          </div>
         ) : null}
-        <span className="text-[20px] font-bold text-fg">{title}</span>
+
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-base sm:text-lg font-extrabold text-[#0F172A] tracking-tight truncate">
+              {title}
+            </h1>
+            {badge ? (
+              badge
+            ) : badgeText ? (
+              <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                {BadgeIcon && <BadgeIcon className="w-3 h-3 text-[#EA580C]" />}
+                {badgeText}
+              </span>
+            ) : null}
+          </div>
+          {subtitle && (
+            <p className="text-xs text-[#0F172A]/55 mt-0.5 font-medium truncate">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
-      {right}
-    </div>
+
+      {right && <div className="shrink-0 flex items-center gap-2">{right}</div>}
+    </header>
   );
 }
 

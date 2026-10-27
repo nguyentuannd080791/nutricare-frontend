@@ -64,9 +64,13 @@ export default function ScanResultScreen({ scanId, photoUri, result, onDone, onR
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Kết quả nhận diện" onBack={onRetry} />
-      <div className="flex-1 overflow-y-auto px-4" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Kết Quả Nhận Diện Món Ăn"
+        subtitle="Phân tích dinh dưỡng & kiểm tra xung đột bệnh lý"
+        onBack={onRetry}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-4 pb-24">
         {photoUri ? <img src={photoUri} alt="Ảnh đã chụp" className="w-full aspect-square object-cover rounded-[20px] mb-4" /> : null}
 
         <div className="rounded-2xl p-4 mb-4" style={{ backgroundColor: COLORS.card }}>
@@ -112,7 +116,7 @@ export default function ScanResultScreen({ scanId, photoUri, result, onDone, onR
         </div>
 
         <DishPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={addItem} excludeIds={pickerExcludeIds} />
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { ShieldCheck, Cpu } from "lucide-react";
-import { COLORS } from "../../../assets/theme/colors";
+import { ShieldCheck, Cpu, CalendarDays } from "lucide-react";
 import { Card, Button, ScreenHeader } from "../../../shared/components/ui";
 
 const DAY_OPTIONS = [3, 5, 7, 14];
@@ -24,9 +23,14 @@ export default function PlanCreateScreen({ data, onBack, onCreate }) {
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Xây dựng thực đơn" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-5" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Xây Dựng Thực Đơn"
+        icon={CalendarDays}
+        subtitle="Thiết lập số ngày cho chu kỳ thực đơn mới"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-5 pb-24">
         <Card className="p-4">
           <span className="block text-[13px] text-descGray">Dựa trên mục tiêu hiện tại</span>
           <span className="block text-[17px] font-bold text-fg mt-[2px]">{target.calories} kcal · {target.protein}g đạm / ngày</span>
@@ -42,9 +46,9 @@ export default function PlanCreateScreen({ data, onBack, onCreate }) {
         </div>
 
         {(data.conditions?.length > 0 || avoidLabels.length > 0) && (
-          <div className="flex flex-row gap-2 rounded-xl p-3" style={{ backgroundColor: COLORS.muted }}>
-            <ShieldCheck size={16} color={COLORS.primary} className="mt-[2px] shrink-0" />
-            <span className="flex-1 text-[12px] text-[#475569] leading-[17px]">
+          <div className="flex flex-row gap-2 rounded-xl p-3 bg-[#ECFDF5] border border-[#DCEEE7]">
+            <ShieldCheck size={16} className="text-[#059669] mt-[2px] shrink-0" />
+            <span className="flex-1 text-[12px] text-[#059669] font-medium leading-[17px]">
               Thực đơn sẽ tự động loại trừ món không phù hợp với bệnh lý / dị ứng: {displayAvoid}.
             </span>
           </div>
@@ -53,7 +57,7 @@ export default function PlanCreateScreen({ data, onBack, onCreate }) {
         <Button full icon={Cpu} busy={generating} onPress={handleCreate}>
           {generating ? "Đang xây dựng thực đơn…" : "Xây dựng thực đơn"}
         </Button>
-      </div>
+      </main>
     </div>
   );
 }

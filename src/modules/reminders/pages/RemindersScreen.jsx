@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Coffee, Utensils, Soup, Droplet } from "lucide-react";
-import { COLORS } from "../../../assets/theme/colors";
+import { Coffee, Utensils, Soup, Droplet, Bell } from "lucide-react";
 import { ScreenHeader } from "../../../shared/components/ui";
 import ReminderCard from "../components/ReminderCard";
 
@@ -21,9 +20,14 @@ export default function RemindersScreen({ reminders: initialReminders, onBack, o
   }
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: COLORS.bg }}>
-      <ScreenHeader title="Nhắc nhở" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-5" style={{ paddingBottom: 40 }}>
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
+      <ScreenHeader
+        title="Nhắc Nhở Bữa Ăn & Uống Nước"
+        icon={Bell}
+        subtitle="Cài đặt lịch trình và chu kỳ nhắc nhở khoa học"
+        onBack={onBack}
+      />
+      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-4 pb-24">
         <div className="flex flex-col gap-[10px]">
           {REMINDER_TYPES.map((r) => (
             <ReminderCard
@@ -36,7 +40,7 @@ export default function RemindersScreen({ reminders: initialReminders, onBack, o
             />
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

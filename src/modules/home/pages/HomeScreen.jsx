@@ -85,7 +85,7 @@ export default function HomeScreen({
       : { protein: 0, carbs: 0, fat: 0 };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-5 pb-10 bg-bg">
+    <div className="flex-1 min-h-0 h-full w-full overflow-y-auto bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans">
       <HomeHeader
         fullName={user.fullName}
         streak={streak}
@@ -93,9 +93,10 @@ export default function HomeScreen({
         onAvatarPress={() => onQuickAction("profile")}
       />
 
-      {error ? <p className="mb-4 text-sm font-medium text-destructive">{error}</p> : null}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
+        {error ? <p className="mb-4 text-sm font-medium text-destructive">{error}</p> : null}
 
-      <div className="space-y-6">
+        <div className="space-y-6">
         {/* HÀNG 1: BENTO GRID 12 CỘT (Calo 5 cột + BMI 3 cột + Vận động & Nước 4 cột) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           <CalorieHeroCard
@@ -199,6 +200,7 @@ export default function HomeScreen({
           </div>
         </div>
       </div>
-    </div>
+    </main>
+  </div>
   );
 }

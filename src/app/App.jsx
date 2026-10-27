@@ -680,17 +680,9 @@ export default function App() {
     <>
       <AppLayout
         navigation={navigation}
+        user={user}
         hideMobileNav={Boolean(nav.overlay)}
         fullWidth={showingAuth}
-        wideContent={
-          isInApp &&
-          !user.isAdmin &&
-          ((!nav.overlay && (nav.tab === "home" || nav.tab === "foods" || nav.tab === "plan")) ||
-            nav.overlay === "bmi" ||
-            nav.overlay === "conditions" ||
-            nav.overlay === "plan-history" ||
-            nav.overlay === "exercise")
-        }
       >
         {renderContent()}
       </AppLayout>
