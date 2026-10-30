@@ -215,8 +215,9 @@ export default function App() {
   // --- BMI: server quyết định có tạo lại mục tiêu hay không ---
   async function handleAddBMI(payload) {
     try {
-      const { targetRecalculated, decision, target, calorieAdjustment } =
+      const res =
         await bmiApi.create(payload);
+      const { targetRecalculated, decision, target, calorieAdjustment, feedbackLoop } = res;
       await reload("bmiRecords", "targets");
 
       let message = activePlan
@@ -231,7 +232,11 @@ export default function App() {
         message += ` Vòng lặp phản hồi Premium: cân nặng 7 ngày qua chưa khớp mục tiêu, đã tự động ${calorieAdjustment > 0 ? "tăng" : "giảm"} ${Math.abs(calorieAdjustment)} kcal.`;
         tone = "warn";
       }
+      if (calorieAdjustment === 0 && feedbackLoop?.message && feedbackLoop.status !== "in_cooldown" && feedbackLoop.status !== "not_premium") {
+        message += ` (Vòng lặp: ${feedbackLoop.message})`;
+      }
       showToast(message, tone);
+      return res;
     } catch (e) {
       reportError(e);
     }
@@ -415,7 +420,13 @@ export default function App() {
     switch (nav.overlay) {
       case "bmi":
         return (
-          <BMIScreen data={userData} user={user} onBack={close} onAddBMI={handleAddBMI} />
+          <BMIScreen
+            data={userData}
+            user={user}
+            onBack={close}
+            onAddBMI={handleAddBMI}
+            onGoUpgrade={() => nav.openOverlay("premium")}
+          />
         );
       case "conditions":
         return (

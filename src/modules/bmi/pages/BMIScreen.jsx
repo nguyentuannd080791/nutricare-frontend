@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Scale,
   Sparkles,
@@ -13,6 +13,8 @@ import BmiStandardsTable from "../components/BmiStandardsTable";
 import WeightUpdateCard from "../components/WeightUpdateCard";
 import WeightHistoryCard from "../components/WeightHistoryCard";
 import BmiTipsCard from "../components/BmiTipsCard";
+import FeedbackLoopCard from "../components/FeedbackLoopCard";
+import { bmiApi } from "../api/bmiApi";
 import { ScreenHeader } from "../../../shared/components/ui";
 
 const NOTE_STORAGE_KEY_PREFIX = "nutricare_bmi_notes_";
@@ -68,7 +70,7 @@ function formatRecordDate(dateInput) {
  * - Lịch sử đo lường cố định (không cho phép xóa) với biểu đồ mini xu hướng
  * - Tab chuyển đổi trên mobile và bố cục 2 cột (5/7) trên desktop
  */
-export default function BMIScreen({ data, user, onBack, onAddBMI }) {
+export default function BMIScreen({ data, user, onBack, onAddBMI, onGoUpgrade }) {
   const records = useMemo(() => data?.bmiRecords || [], [data?.bmiRecords]);
   const latestRecord = records[0] || null;
   const activeTarget = data?.targets?.find((t) => t.isActive) || null;
@@ -99,6 +101,19 @@ export default function BMIScreen({ data, user, onBack, onAddBMI }) {
   const [toastMessage, setToastMessage] = useState(null);
   const [mobileTab, setMobileTab] = useState("update"); // "update" | "history" | "standards"
   const [storedNotes, setStoredNotes] = useState(() => getStoredNotes(user?.id));
+  const [feedbackStatus, setFeedbackStatus] = useState(() => activeTarget?.feedbackLoop || null);
+
+  useEffect(() => {
+    let cancelled = false;
+    bmiApi.getFeedbackStatus()
+      .then((res) => {
+        if (!cancelled && res) setFeedbackStatus(res);
+      })
+      .catch(() => null);
+    return () => {
+      cancelled = true;
+    };
+  }, [latestRecord?.id, user?.isPremium]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -178,7 +193,10 @@ export default function BMIScreen({ data, user, onBack, onAddBMI }) {
         }));
       }
 
-      await onAddBMI({ weightKg: newWeightNum });
+      const res = await onAddBMI({ weightKg: newWeightNum });
+      if (res?.feedbackLoop) {
+        setFeedbackStatus(res.feedbackLoop);
+      }
       const newScore = BmiEngine.calculateScore(newWeightNum, fixedHeight);
       showToast(`Đã lưu cân nặng ${newWeightNum} kg (BMI: ${newScore}) thành công!`);
       setOptionalNote("");
@@ -364,6 +382,14 @@ export default function BMIScreen({ data, user, onBack, onAddBMI }) {
               setOptionalNote={setOptionalNote}
               onSave={handleSaveNewWeight}
               isSaving={isSaving}
+              className={mobileTab === "update" ? "block" : "hidden lg:block"}
+            />
+
+            {/* VÒNG LẶP PHẢN HỒI CALO TỰ ĐỘNG */}
+            <FeedbackLoopCard
+              feedbackStatus={feedbackStatus}
+              isPremium={Boolean(user?.isPremium)}
+              onUpgrade={onGoUpgrade}
               className={mobileTab === "update" ? "block" : "hidden lg:block"}
             />
 

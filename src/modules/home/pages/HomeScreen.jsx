@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, ClipboardList, Plus } from "lucide-react";
+import { Sparkles, ClipboardList, Plus, Flame, X } from "lucide-react";
 import { Button, EmptyState } from "../../../shared/components/ui";
 import { classifyBMI } from "../../../shared/domain/bmi";
 import { dateKey, cycleIndexForDate } from "../../../shared/domain/planCycle";
@@ -36,6 +36,17 @@ export default function HomeScreen({
   const bmiInfo = latestBMI ? classifyBMI(latestBMI.bmi) : null;
 
   const todayKey = dateKey();
+  const [streakNoticeDismissed, setStreakNoticeDismissed] = useState(() => {
+    return typeof sessionStorage !== "undefined" && sessionStorage.getItem("nutricare_streak_notice_dismissed") === todayKey;
+  });
+
+  const handleDismissStreakNotice = () => {
+    setStreakNoticeDismissed(true);
+    try {
+      sessionStorage.setItem("nutricare_streak_notice_dismissed", todayKey);
+    } catch {}
+  };
+
   const todayPlanDay = activePlan?.days[cycleIndexForDate(activePlan)];
   const rawProgress = userData.progress[todayKey];
   const todayProgress = activePlan && rawProgress?.planId === activePlan.id ? rawProgress : {};
@@ -95,6 +106,34 @@ export default function HomeScreen({
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 pb-24">
         {error ? <p className="mb-4 text-sm font-medium text-destructive">{error}</p> : null}
+
+        {/* Cảnh báo đứt chuỗi thân thiện & khích lệ người dùng */}
+        {streak?.brokeYesterday && !streakNoticeDismissed && (
+          <div className="rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4 flex items-start justify-between gap-3 shadow-xs transition-all">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-amber-500/20 text-amber-700 shrink-0 mt-0.5">
+                <Flame className="w-5 h-5 text-amber-600 fill-amber-500" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-amber-950">
+                  Chuỗi ngày ăn sạch đã được đặt lại
+                </h4>
+                <p className="text-xs text-amber-900/80 mt-0.5 leading-relaxed">
+                  Hôm qua bạn chưa hoàn thành đủ các bữa ăn hoặc bài tập trong kế hoạch{streak.lostStreak > 0 ? ` (chuỗi ${streak.lostStreak} ngày đã dừng)` : ""}. Đừng nản lòng, hãy hoàn thành các mục tiêu hôm nay để bắt đầu lại chuỗi mới nhé!
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDismissStreakNotice}
+              className="text-amber-800 hover:text-amber-950 p-1.5 rounded-lg hover:bg-amber-500/15 transition-colors cursor-pointer shrink-0"
+              title="Đóng thông báo"
+              aria-label="Đóng thông báo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <div className="space-y-6">
         {/* HÀNG 1: BENTO GRID 12 CỘT (Calo 5 cột + BMI 3 cột + Vận động & Nước 4 cột) */}

@@ -1,30 +1,25 @@
 import React from "react";
-import { CalendarDays, Sparkles } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { formatTodayLabel, greetingFor } from "../domain/todayLabel";
 import { ScreenHeader } from "../../../shared/components/ui";
+import StreakBadge from "./StreakBadge";
 
 /**
  * Header Trang chủ (SOLID: Single Responsibility)
- * Tuân thủ cấu trúc header thống nhất toàn hệ thống theo chuẩn FoodsScreen (ScreenHeader):
- * - Icon CalendarDays màu xanh ngọc
- * - Tiêu đề chào hỏi trang nhã + tên người dùng
- * - Phụ đề hiển thị thứ, ngày tháng năm hôm nay
- * - Huy hiệu chuỗi ngày ăn sạch với Sparkles cam
- * - Icon người dùng trên máy tính đã chuyển về góc dưới của Sidebar (ẩn ở header trên desktop).
+ * - Tích hợp StreakBadge chuẩn xác, minh bạch, loại bỏ bug 0 || 7
+ * - Hiển thị lời chào thân mật và thông tin thời gian thực
  */
 export default function HomeHeader({ fullName, streak, restDay, onAvatarPress }) {
   const now = new Date();
   const firstName = (fullName || "").trim().split(" ").slice(-1)[0];
   const initial = (fullName || "U").trim().charAt(0).toUpperCase();
-  const streakDays = streak?.current || 7;
 
   return (
     <ScreenHeader
       icon={CalendarDays}
       title={`${greetingFor(now.getHours())}, ${firstName || "bạn"}!`}
       subtitle={`Hôm nay, ${formatTodayLabel(now)}`}
-      badgeText={restDay ? "Hôm nay nghỉ ngơi" : `Chuỗi ${streakDays} ngày ăn sạch`}
-      badgeIcon={Sparkles}
+      badge={<StreakBadge streak={streak} restDay={restDay} />}
       right={
         onAvatarPress ? (
           <button
