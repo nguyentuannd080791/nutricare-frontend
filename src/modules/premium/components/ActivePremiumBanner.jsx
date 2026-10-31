@@ -1,7 +1,7 @@
 import React from "react";
 import { Crown, Sparkles, Camera, Scale, ShieldAlert } from "lucide-react";
 
-export default function ActivePremiumBanner({ user, onRequestCancel }) {
+export default function ActivePremiumBanner({ user, onRequestCancel, onOpenHistory }) {
   if (!user?.isPremium) return null;
 
   return (
@@ -24,13 +24,24 @@ export default function ActivePremiumBanner({ user, onRequestCancel }) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onRequestCancel}
-          className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white transition-all cursor-pointer whitespace-nowrap self-stretch sm:self-auto text-center"
-        >
-          Quản Lý / Hủy Gói
-        </button>
+        <div className="flex items-center gap-2 self-stretch sm:self-auto">
+          {onOpenHistory && (
+            <button
+              type="button"
+              onClick={onOpenHistory}
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-white transition-all cursor-pointer text-center"
+            >
+              Lịch Sử Thanh Toán
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onRequestCancel}
+            className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-300/30 text-xs font-bold text-white transition-all cursor-pointer text-center"
+          >
+            Hủy Gói
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-4 border-t border-white/15">

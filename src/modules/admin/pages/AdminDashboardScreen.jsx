@@ -4,6 +4,7 @@ import { ScreenHeader, Button } from "../../../shared/components/ui";
 import SegmentedControl from "../../../shared/components/SegmentedControl";
 import KpiCard from "../components/KpiCard";
 import DailyBarChart from "../components/DailyBarChart";
+import PaidUsersReportSection from "../components/PaidUsersReportSection";
 import { useAdminStats } from "../hooks/useAdminStats";
 
 const RANGES = [
@@ -77,6 +78,11 @@ export default function AdminDashboardScreen({ onBack, onGoUsers }) {
               <DailyBarChart title="Thực đơn tạo mỗi ngày" series={data.series} valueOf={(d) => d.plansCreated} />
               <DailyBarChart title="Người dùng có ghi nhận bữa ăn mỗi ngày" series={data.series} valueOf={(d) => d.loggingUsers} />
               <DailyBarChart title="Tỉ lệ hoàn thành mỗi ngày" series={data.series} valueOf={(d) => d.completionRate} format={pct} />
+            </div>
+
+            {/* Báo cáo doanh thu & người dùng trả phí SePay */}
+            <div className="mt-6">
+              <PaidUsersReportSection days={days} />
             </div>
           </>
         )}

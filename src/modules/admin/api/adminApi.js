@@ -11,4 +11,5 @@ export const adminApi = {
     return request("GET", `/admin/users?${params}`);
   },
   user: (id) => request("GET", `/admin/users/${id}`),
+  paymentReport: (days = 30) => request("GET", `/admin/payments/payment-report?days=${days}`),
 };
