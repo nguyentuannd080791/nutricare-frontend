@@ -93,7 +93,7 @@ export default function MealItemCard({
       </div>
 
       {/* Hàng 2: Tên món ăn & Khẩu phần & Các món con (nếu mâm cơm combo) */}
-      <div className="space-y-1">
+      <div className="space-y-2">
         <h4
           className={`text-sm sm:text-base font-bold leading-snug transition-colors ${
             completed ? "line-through text-[#0F172A]/50" : "text-[#0F172A]"
@@ -101,16 +101,39 @@ export default function MealItemCard({
         >
           {dish.name}
         </h4>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-[#059669] font-medium">
-            Khẩu phần: {dish.serving}
-          </span>
-          {Array.isArray(items) && items.length > 1 && (
-            <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F0F8F6] text-[#059669] font-semibold border border-[#DCEEE7]">
-              Mâm cơm {items.length} món
+
+        {/* Khẩu phần Gram & Chi tiết từng món con trong mâm cơm */}
+        {Array.isArray(items) && items.length > 1 ? (
+          <div className="space-y-1.5 pt-0.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+                Tổng: {items.reduce((sum, it) => sum + (it.gram || 0), 0) || dish.gram || "Chuẩn"}g
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#F0F8F6] text-[#059669] font-semibold border border-[#DCEEE7]">
+                Mâm cơm {items.length} món
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+              {items.map((it, idx) => (
+                <div
+                  key={it.dishId || idx}
+                  className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]/70 text-[#0F172A]/80"
+                >
+                  <span className="font-semibold truncate mr-2">{it.name}</span>
+                  <span className="font-bold text-[#059669] shrink-0">
+                    {it.gram ? `${it.gram}g` : it.serving}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+              Khẩu phần: {dish.gram ? `${dish.gram}g` : dish.serving}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Hàng 3: Dinh dưỡng (Calo, Đạm, Bột, Béo) & Thao tác Đổi món / Khóa */}

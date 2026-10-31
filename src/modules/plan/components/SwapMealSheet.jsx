@@ -17,7 +17,10 @@ export default function SwapMealSheet({ meal, onClose, onPick }) {
           style={{ backgroundColor: COLORS.muted }}
         >
           <span className="flex-1 text-left text-[13.5px] font-semibold text-fg mr-2">{c.nameVi}</span>
-          <span className="text-[12px] text-descGray shrink-0">{Math.round(c.kcal)} kcal</span>
+          <div className="flex items-center gap-2 text-[12px] text-descGray shrink-0">
+            {c.gram && <span className="text-[#059669] font-bold">{c.gram}g</span>}
+            <span>{Math.round(c.kcal)} kcal</span>
+          </div>
         </button>
       ))}
     </ModalSheet>

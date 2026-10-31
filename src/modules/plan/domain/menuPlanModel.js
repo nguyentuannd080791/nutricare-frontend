@@ -78,7 +78,8 @@ export const DISH_DATABASE = [
     protein: 34,
     carbs: 58,
     fat: 6.5,
-    serving: "1 tô vừa (450g)",
+    gram: 450,
+    serving: "450g (1 tô vừa)",
     desc: "Nước dùng gà hầm gừng hành nướng, bánh phở tươi ít béo",
   },
   {
@@ -91,7 +92,8 @@ export const DISH_DATABASE = [
     protein: 26,
     carbs: 48,
     fat: 8.5,
-    serving: "1 tô ấm (400g)",
+    gram: 400,
+    serving: "400g (1 tô ấm)",
     desc: "Yến Mạch Úc nguyên cám, thịt thăn nạc băm nhỏ và lòng đào",
   },
   {
@@ -104,7 +106,8 @@ export const DISH_DATABASE = [
     protein: 22,
     carbs: 44,
     fat: 16.0,
-    serving: "2 lát bánh + 1 trứng + 1/2 quả bơ",
+    gram: 180,
+    serving: "180g (2 lát bánh + 1 trứng + bơ)",
     desc: "Bánh mì lúa mạch đen nướng giòn kèm bơ sáp 0% cholesterol",
   },
   {
@@ -117,7 +120,8 @@ export const DISH_DATABASE = [
     protein: 31,
     carbs: 62,
     fat: 7.2,
-    serving: "1 tô (480g)",
+    gram: 480,
+    serving: "480g (1 tô vừa)",
     desc: "Tôm sú tươi, thịt thăn heo luộc, nước củ cải ngọt tự nhiên",
   },
   {
@@ -130,7 +134,8 @@ export const DISH_DATABASE = [
     protein: 28,
     carbs: 52,
     fat: 8.0,
-    serving: "1 tô (450g)",
+    gram: 450,
+    serving: "450g (1 tô vừa)",
     desc: "Mọc nạc trộn mộc nhĩ nấm hương, dọc mùng thanh nhiệt",
   },
   {
@@ -143,7 +148,8 @@ export const DISH_DATABASE = [
     protein: 32,
     carbs: 54,
     fat: 7.5,
-    serving: "1 đĩa vừa (250g)",
+    gram: 250,
+    serving: "250g (1 đĩa vừa)",
     desc: "Hạt sen Huế ninh mềm, ức gà luộc xé trộn tiêu chanh",
   },
 
@@ -158,7 +164,8 @@ export const DISH_DATABASE = [
     protein: 45,
     carbs: 68,
     fat: 12.0,
-    serving: "1 chén cơm gạo lứt + 180g ức gà + bông cải hấp",
+    gram: 500,
+    serving: "150g cơm gạo lứt + 180g ức gà + 170g bông cải",
     desc: "Ức gà ướp sốt teriyaki ít muối, bổ sung dồi dào chất xơ",
   },
   {
@@ -171,7 +178,8 @@ export const DISH_DATABASE = [
     protein: 42,
     carbs: 55,
     fat: 20.0,
-    serving: "150g fillet cá hồi + 1 củ khoai lang Nhật + măng tây",
+    gram: 450,
+    serving: "150g fillet cá hồi + 150g khoai lang + 150g măng tây",
     desc: "Giàu Omega-3 kháng viêm tự nhiên, tinh bột hấp thu chậm",
   },
   {
@@ -184,7 +192,8 @@ export const DISH_DATABASE = [
     protein: 48,
     carbs: 60,
     fat: 14.5,
-    serving: "160g bắp bò hoa + ớt chuông 3 màu + 1 chén cơm quinoa",
+    gram: 480,
+    serving: "160g bắp bò hoa + 160g cơm quinoa + 160g ớt chuông",
     desc: "Tăng cường sắt và kẽm sinh học, giàu chất chống oxy hóa",
   },
   {
@@ -197,7 +206,8 @@ export const DISH_DATABASE = [
     protein: 46,
     carbs: 45,
     fat: 16.0,
-    serving: "180g tôm sú + 1/2 quả bơ + 1 quả trứng gà ta",
+    gram: 420,
+    serving: "180g tôm sú + 120g bơ + 120g salad trứng",
     desc: "Đạm tinh khiết từ hải sản biển, vị ngọt thanh tự nhiên",
   },
   {
@@ -210,7 +220,8 @@ export const DISH_DATABASE = [
     protein: 38,
     carbs: 52,
     fat: 15.0,
-    serving: "3 bìa đậu hũ nhồi + chén cơm gạo lứt nhỏ",
+    gram: 420,
+    serving: "240g đậu hũ nhồi + 180g cơm gạo lứt",
     desc: "Kết hợp đạm thực vật isoflavone và thịt thăn heo xay",
   },
   {
@@ -223,7 +234,8 @@ export const DISH_DATABASE = [
     protein: 44,
     carbs: 72,
     fat: 13.5,
-    serving: "1 tô lớn (150g bắp bò nạc, không mỡ màng)",
+    gram: 480,
+    serving: "480g (150g bắp bò nạc, không mỡ màng)",
     desc: "Nước dùng hầm xương sả gừng thanh vị, ăn kèm bắp chuối",
   },
 
@@ -238,7 +250,8 @@ export const DISH_DATABASE = [
     protein: 16,
     carbs: 24,
     fat: 4.5,
-    serving: "1 hũ 150g + 1 muỗng hạt chia + quả mọng",
+    gram: 180,
+    serving: "150g sữa chua + 30g hạt chia & việt quất",
     desc: "Men vi sinh Probiotics dồi dào bảo vệ hệ tiêu hóa đường ruột",
   },
   {
@@ -251,7 +264,8 @@ export const DISH_DATABASE = [
     protein: 8,
     carbs: 32,
     fat: 9.5,
-    serving: "1 ly lớn (300ml)",
+    gram: 300,
+    serving: "300ml (1 ly lớn)",
     desc: "Cung cấp năng lượng tức thì và kali chống co rút cơ bắp",
   },
   {
@@ -264,7 +278,8 @@ export const DISH_DATABASE = [
     protein: 7,
     carbs: 20,
     fat: 12.0,
-    serving: "30g hạt sấy khô + 1 quả táo xanh giòn",
+    gram: 150,
+    serving: "30g hạt sấy khô + 120g táo xanh",
     desc: "Chất béo đơn không bão hòa tốt cho tim mạch và não bộ",
   },
   {
@@ -277,7 +292,8 @@ export const DISH_DATABASE = [
     protein: 11,
     carbs: 38,
     fat: 3.5,
-    serving: "2 chiếc bánh nhỏ kèm 1 thìa mật ong",
+    gram: 160,
+    serving: "160g (2 bánh pancake yến mạch nhỏ)",
     desc: "Không bột mì, hoàn toàn từ yến mạch xay mịn và lòng trắng",
   },
   {
@@ -290,7 +306,8 @@ export const DISH_DATABASE = [
     protein: 14,
     carbs: 2,
     fat: 10.0,
-    serving: "2 quả trứng luộc + tách trà ấm",
+    gram: 120,
+    serving: "120g (2 quả trứng luộc + trà ấm)",
     desc: "Nhanh gọn, đạm nguyên bản tinh khiết, 0g tinh bột xấu",
   },
   {
@@ -303,7 +320,8 @@ export const DISH_DATABASE = [
     protein: 6,
     carbs: 18,
     fat: 11.0,
-    serving: "1 chai 250ml thanh trùng",
+    gram: 250,
+    serving: "250ml (1 chai thanh trùng)",
     desc: "Hương thơm dịu dàng, an thần nhẹ nhàng cho buổi chiều tập trung",
   },
 
@@ -318,7 +336,8 @@ export const DISH_DATABASE = [
     protein: 38,
     carbs: 35,
     fat: 8.5,
-    serving: "160g cá chẽm + 1 chén canh cải + 1/2 chén cơm lứt",
+    gram: 450,
+    serving: "160g cá chẽm + 150g canh cải + 140g cơm lứt",
     desc: "Thịt cá trắng mềm ngọt, tiêu hóa nhanh không gây ậm ạch",
   },
   {
@@ -331,7 +350,8 @@ export const DISH_DATABASE = [
     protein: 30,
     carbs: 48,
     fat: 9.0,
-    serving: "3 cuốn lớn đầy đặn rau sống",
+    gram: 350,
+    serving: "350g (3 cuốn lớn đầy đặn rau sống)",
     desc: "Đầy đủ chất đạm, tinh bột chậm và rau xanh giòn mát",
   },
   {
@@ -344,7 +364,8 @@ export const DISH_DATABASE = [
     protein: 34,
     carbs: 42,
     fat: 6.0,
-    serving: "1 tô lớn nhiều cá và dọc mùng, đậu bắp",
+    gram: 450,
+    serving: "300g canh chua cá lóc + 150g cơm lứt",
     desc: "Vị chua thanh mát kích thích vị giác, ngủ ngon giấc hơn",
   },
   {
@@ -357,7 +378,8 @@ export const DISH_DATABASE = [
     protein: 39,
     carbs: 28,
     fat: 13.0,
-    serving: "150g thăn heo nạc nướng + đĩa xà lách Roman",
+    gram: 350,
+    serving: "150g thăn heo nạc + 200g xà lách Roman",
     desc: "Hương thơm lá xạ hương và oregano, hạn chế tối đa tinh bột",
   },
   {
@@ -370,7 +392,8 @@ export const DISH_DATABASE = [
     protein: 36,
     carbs: 32,
     fat: 5.5,
-    serving: "150g mực ống giòn + 1 tô canh củ sen cà rốt",
+    gram: 450,
+    serving: "150g mực ống giòn + 300g canh củ sen",
     desc: "Calo cực thấp, phù hợp ngày có mục tiêu thâm hụt calo sâu",
   },
   {
@@ -383,7 +406,8 @@ export const DISH_DATABASE = [
     protein: 29,
     carbs: 50,
     fat: 7.0,
-    serving: "1 tô ấm nóng (450g)",
+    gram: 450,
+    serving: "450g (1 tô ấm nóng)",
     desc: "Ấm bụng, bổ khí huyết và phục hồi thể lực sau ngày làm việc",
   },
 ];
@@ -524,11 +548,27 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
 
       // Thông tin món ăn
       let dish;
+      let comboItems = [];
       if (rawMeal) {
         const kcal = Math.round(rawMeal.kcal || (rawMeal.dish?.calories) || 400);
         const protein = Math.round(rawMeal.macros?.protein_g || rawMeal.dish?.protein || 25);
         const carbs = Math.round(rawMeal.macros?.carb_g || rawMeal.dish?.carbs || 50);
         const fat = Math.round(rawMeal.macros?.fat_g || rawMeal.dish?.fat || 10);
+        const rawItems = Array.isArray(rawMeal.items) ? rawMeal.items : (rawMeal.dish?.items || []);
+        comboItems = rawItems.map((it) => ({
+          dishId: it.dishId,
+          name: it.nameVi || it.name,
+          role: it.role,
+          roleLabel: it.roleLabel,
+          gram: it.gram || (it.serving ? parseInt(it.serving, 10) : null),
+          serving: it.serving || (it.gram ? `${it.gram}g` : "1 phần"),
+          calories: Math.round(it.kcal || 0),
+          protein: Math.round(it.macros?.protein_g || 0),
+          carbs: Math.round(it.macros?.carb_g || 0),
+          fat: Math.round(it.macros?.fat_g || 0),
+          swapCandidates: it.swapCandidates || [],
+        }));
+
         dish = {
           id: rawMeal.dishId || rawMeal.dish?.id || `dish-${dayIdx}-${slotConfig.id}`,
           name: rawMeal.nameVi || rawMeal.dish?.name || "Món ăn cân bằng",
@@ -536,15 +576,17 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
           protein,
           carbs,
           fat,
-          serving: rawMeal.serving || rawMeal.dish?.serving || "1 phần chuẩn",
+          gram: rawMeal.gram || (comboItems.length > 0 ? comboItems.reduce((s, i) => s + (i.gram || 0), 0) : null),
+          serving: rawMeal.serving || rawMeal.dish?.serving || (rawMeal.gram ? `${rawMeal.gram}g` : "1 phần chuẩn"),
           desc: rawMeal.desc || rawMeal.dish?.desc || "",
-          items: rawMeal.items || [],
+          items: comboItems,
         };
       } else {
         // Fallback từ DISH_DATABASE
         const pool = DISH_DATABASE.filter((d) => d.slot === slotConfig.id);
         const dishIndex = (dayIdx * 2 + (slotConfig.id === "trua" ? 1 : 0)) % pool.length;
         dish = { ...pool[dishIndex] };
+        comboItems = dish.items || [];
       }
 
       return {
@@ -559,7 +601,7 @@ export function buildPlanViewModel(plan, targetCalories = 1850, userProgress = {
         kcal: dish.calories,
         nameVi: dish.name,
         macros: { protein_g: dish.protein, carb_g: dish.carbs, fat_g: dish.fat },
-        items: dish.items || rawMeal?.items || [],
+        items: comboItems,
         swapCandidates: rawMeal?.swapCandidates || [],
         completed,
       };

@@ -60,7 +60,7 @@ export default function SwapMealModal({
                 {currentDish.name}
               </p>
               <p className="text-xs text-[#0F172A]/60">
-                {currentDish.calories} kcal • {currentDish.serving}
+                {currentDish.calories} kcal • Khẩu phần: {currentDish.gram ? `${currentDish.gram}g` : currentDish.serving}
               </p>
             </div>
             <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-[#EA580C]/30 text-[#EA580C]">
@@ -105,16 +105,20 @@ export default function SwapMealModal({
                         {altDish.desc}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 pl-7 pt-1 text-[11px] font-medium text-[#0F172A]/65">
+                    <div className="flex flex-wrap items-center gap-2 pl-7 pt-1 text-[11px] font-medium text-[#0F172A]/65">
                       <span className="font-bold text-[#059669]">
                         {altDish.calories} calo
                       </span>
                       <span>•</span>
-                      <span>Đạm: {altDish.protein}g</span>
+                      <span className="font-bold text-[#059669] bg-[#ECFDF5] px-1.5 py-0.5 rounded">
+                        {altDish.gram ? `${altDish.gram}g` : altDish.serving}
+                      </span>
                       <span>•</span>
-                      <span>Bột: {altDish.carbs}g</span>
+                      <span>Đ: {altDish.protein}g</span>
                       <span>•</span>
-                      <span>Béo: {altDish.fat}g</span>
+                      <span>B: {altDish.carbs}g</span>
+                      <span>•</span>
+                      <span>M: {altDish.fat}g</span>
                     </div>
                   </div>
 
