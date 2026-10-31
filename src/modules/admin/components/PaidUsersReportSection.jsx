@@ -55,7 +55,7 @@ export default function PaidUsersReportSection({ days = 30 }) {
               <DollarSign className="w-4 h-4" />
             </div>
             <h3 className="text-base font-extrabold text-[#0F172A]">
-              Báo Cáo Doanh Thu & Người Dùng Trả Phí (SePay)
+              Báo Cáo Doanh Thu & Người Dùng Trả Phí
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -148,7 +148,7 @@ export default function PaidUsersReportSection({ days = 30 }) {
                       {Number(tx.amount).toLocaleString("vi-VN")} đ
                     </td>
                     <td className="py-3 px-3.5 text-slate-500 font-medium">
-                      {tx.gateway || "SePay"}
+                      VietQR
                     </td>
                     <td className="py-3 px-3.5 text-slate-400 text-[11px]">
                       {new Date(tx.completedAt || tx.createdAt).toLocaleDateString("vi-VN", {

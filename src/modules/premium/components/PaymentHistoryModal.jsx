@@ -49,7 +49,7 @@ export default function PaymentHistoryModal({ open, onClose }) {
             </div>
             <div>
               <h3 className="font-extrabold text-base sm:text-lg">Lịch Sử Giao Dịch & Hóa Đơn</h3>
-              <p className="text-xs text-emerald-100">Các đơn hàng thanh toán qua cổng SePay</p>
+              <p className="text-xs text-emerald-100">Lịch sử thanh toán và nâng cấp gói Hội viên Pro</p>
             </div>
           </div>
           <button
@@ -104,7 +104,7 @@ export default function PaymentHistoryModal({ open, onClose }) {
                       </span>
                     </div>
                     <p className="text-slate-500">
-                      Gói: <strong>{tx.plan === "yearly" ? "Hội viên 1 Năm" : "Hội viên 1 Tháng"}</strong> • Cổng: {tx.gateway || "SePay"}
+                      Gói: <strong>{tx.plan === "yearly" ? "Hội viên 1 Năm" : "Hội viên 1 Tháng"}</strong> • Phương thức: VietQR
                     </p>
                     <p className="text-[11px] text-slate-400">
                       {new Date(tx.createdAt).toLocaleString("vi-VN")}

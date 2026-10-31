@@ -80,7 +80,7 @@ export default function AdminDashboardScreen({ onBack, onGoUsers }) {
               <DailyBarChart title="Tỉ lệ hoàn thành mỗi ngày" series={data.series} valueOf={(d) => d.completionRate} format={pct} />
             </div>
 
-            {/* Báo cáo doanh thu & người dùng trả phí SePay */}
+            {/* Báo cáo doanh thu & người dùng trả phí */}
             <div className="mt-6">
               <PaidUsersReportSection days={days} />
             </div>

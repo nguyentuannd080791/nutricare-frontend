@@ -31,7 +31,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
     billingCycle === "yearly" ? PRICING_PLANS.premium.priceYearly : PRICING_PLANS.premium.priceMonthly;
   const cycleTitle = billingCycle === "yearly" ? "Gói Năm (12 tháng)" : "Gói Tháng (1 tháng)";
 
-  // 1. Khởi tạo đơn hàng SePay qua API backend
+  // 1. Khởi tạo đơn hàng thanh toán qua API backend
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -47,7 +47,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
       })
       .catch((err) => {
         if (isMounted) {
-          setError(err?.message || "Không thể tạo đơn hàng thanh toán SePay.");
+          setError(err?.message || "Không thể tạo đơn hàng thanh toán.");
           setLoading(false);
         }
       });
@@ -66,7 +66,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
     return () => clearInterval(countdownTimerRef.current);
   }, []);
 
-  // 3. Polling kiểm tra trạng thái đơn hàng thời gian thực qua SePay webhook
+  // 3. Polling kiểm tra trạng thái đơn hàng thời gian thực
   useEffect(() => {
     if (!orderData?.order?.orderCode || isSuccess) return;
 
@@ -122,7 +122,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
     return (
       <div className="py-24 text-center space-y-3">
         <div className="w-10 h-10 border-3 border-[#059669] border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm font-bold text-slate-700">Đang khởi tạo cổng thanh toán SePay...</p>
+        <p className="text-sm font-bold text-slate-700">Đang khởi tạo mã thanh toán VietQR...</p>
         <p className="text-xs text-slate-400">Vui lòng chờ trong giây lát</p>
       </div>
     );
@@ -184,9 +184,9 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
             </span>
             <h3 className="text-2xl font-black text-[#0F172A]">Thanh Toán Hoàn Tất!</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-              Cổng thanh toán SePay đã xác nhận thành công đơn hàng{" "}
+              Hệ thống đã xác nhận thanh toán thành công đơn hàng{" "}
               <strong className="text-slate-800">{order?.orderCode}</strong>. Toàn bộ đặc quyền Hội
-              viên NutriCare Pro đã được mở khóa!
+              viên NutriCare Pro đã được kích hoạt!
             </p>
           </div>
 
@@ -210,7 +210,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
           <p className="text-[11px] text-slate-400">Đang chuyển tiếp về ứng dụng trong giây lát...</p>
         </div>
       ) : (
-        /* ================= GIAO DIỆN THANH TOÁN SEPAY VIETQR ================= */
+        /* ================= GIAO DIỆN THANH TOÁN VIETQR ================= */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* CỘT TRÁI: TÓM TẮT ĐƠN HÀNG & HƯỚNG DẪN */}
           <div className="lg:col-span-5 space-y-6">
@@ -282,7 +282,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
             {/* Hướng dẫn thanh toán 3 bước */}
             <div className="p-5 rounded-3xl bg-[#F0F8F6] border border-[#DCEEE7] space-y-3">
               <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Hướng dẫn thanh toán tự động SePay
+                Hướng dẫn chuyển khoản nhanh VietQR
               </h4>
               <ol className="space-y-2 text-xs text-slate-600">
                 <li className="flex items-start gap-2">
@@ -302,14 +302,14 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
                     3
                   </span>
                   <span>
-                    Hệ thống SePay tự động nhận diện nội dung và kích hoạt Pro sau 3 - 5 giây
+                    Hệ thống tự động kiểm tra nội dung và kích hoạt Pro tức thì sau 3 - 5 giây
                   </span>
                 </li>
               </ol>
             </div>
           </div>
 
-          {/* CỘT PHẢI: MÃ QR SEPAY & THÔNG TIN CHUYỂN KHOẢN */}
+          {/* CỘT PHẢI: MÃ QR & THÔNG TIN CHUYỂN KHOẢN */}
           <div className="lg:col-span-7 space-y-6">
             <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-[#059669] shadow-xl space-y-6 relative overflow-hidden">
               {/* Radar status */}
@@ -319,7 +319,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#059669] opacity-75" />
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#059669]" />
                   </span>
-                  <span className="font-bold">Đang chờ cổng SePay xác nhận chuyển khoản...</span>
+                  <span className="font-bold">Đang chờ hệ thống xác nhận thanh toán...</span>
                 </div>
                 <div className="w-4 h-4 border-2 border-[#059669] border-t-transparent rounded-full animate-spin shrink-0" />
               </div>
@@ -330,7 +330,7 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
                 <div className="w-48 h-48 sm:w-56 sm:h-56 p-2.5 rounded-2xl bg-white border-2 border-slate-200 shadow-md flex items-center justify-center shrink-0">
                   <img
                     src={paymentInfo?.qrUrl || paymentInfo?.vietQrAppUrl || paymentInfo?.sepayQrUrl}
-                    alt={`SePay VietQR ${order?.orderCode}`}
+                    alt={`VietQR ${order?.orderCode}`}
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       if (paymentInfo?.sepayQrUrl && e.currentTarget.src !== paymentInfo.sepayQrUrl) {
@@ -422,36 +422,35 @@ export default function PaymentCheckoutView({ billingCycle, onBack, onSuccess })
                       {paymentInfo?.transferContent}
                     </p>
                     <p className="text-[10px] text-amber-800 leading-tight">
-                      * Giữ nguyên mã này trong nội dung chuyển tiền để SePay tự động kích hoạt gói.
+                      * Vui lòng giữ nguyên mã này trong nội dung chuyển khoản để hệ thống tự động kích hoạt gói tức thì.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Dev / Test Sandbox Trigger Button */}
-              <div className="pt-4 border-t border-slate-100 space-y-2">
-                <button
-                  type="button"
-                  disabled={isSimulating}
-                  onClick={handleSimulateTestPayment}
-                  className="w-full py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 border border-slate-200"
-                >
-                  {isSimulating ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-[#059669] border-t-transparent rounded-full animate-spin" />
-                      <span>Đang kiểm tra SePay IPN...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-4 h-4 text-amber-500" />
-                      <span>⚡ Giả lập thanh toán thành công (Môi trường Test / Sandbox)</span>
-                    </>
-                  )}
-                </button>
-                <p className="text-center text-[10px] text-slate-400">
-                  Nút trên mô phỏng Webhook của SePay gửi tín hiệu xác nhận thành công mà không cần chuyển tiền thật.
-                </p>
-              </div>
+              {/* Dev / Test Sandbox Trigger Button (Chỉ hiển thị trong môi trường lập trình DEV) */}
+              {import.meta.env.DEV && (
+                <div className="pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    disabled={isSimulating}
+                    onClick={handleSimulateTestPayment}
+                    className="w-full py-2.5 px-4 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2 border border-dashed border-slate-300"
+                  >
+                    {isSimulating ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-[#059669] border-t-transparent rounded-full animate-spin" />
+                        <span>Đang kích hoạt thử nghiệm...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-3.5 h-3.5 text-amber-500" />
+                        <span>⚡ Kích hoạt thử nghiệm (Chế độ phát triển)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

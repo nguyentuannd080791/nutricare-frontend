@@ -54,7 +54,7 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
         icon={Crown}
         subtitle={
           view === "checkout"
-            ? "Thanh toán tự động qua cổng SePay với mã VietQR"
+            ? "Quét mã VietQR chuyển khoản tự động, kích hoạt tức thì"
             : "Mở khoá sức mạnh AI không giới hạn & công nghệ cân chỉnh Calo tự động"
         }
         onBack={view === "checkout" ? () => setView("plans") : onBack}
@@ -81,7 +81,7 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
       {/* Main Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8 pb-24">
         {view === "checkout" ? (
-          /* ================= GIAO DIỆN THANH TOÁN SEPAY CHUYÊN BIỆT ================= */
+          /* ================= GIAO DIỆN THANH TOÁN VIETQR ================= */
           <PaymentCheckoutView
             billingCycle={billingCycle}
             onBack={() => setView("plans")}
