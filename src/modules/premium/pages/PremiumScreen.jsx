@@ -30,7 +30,7 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
           return "checkout";
         }
       }
-    } catch {}
+    } catch { }
     return "plans";
   });
 
@@ -41,7 +41,7 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
         const parsed = JSON.parse(saved);
         return parsed.billingCycle || "yearly";
       }
-    } catch {}
+    } catch { }
     return "yearly";
   });
 
@@ -57,20 +57,20 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
         CHECKOUT_VIEW_STORAGE_KEY,
         JSON.stringify({ view: "checkout", billingCycle: cycle, time: Date.now() })
       );
-    } catch {}
+    } catch { }
   };
 
   const handleBackToPlans = () => {
     try {
       sessionStorage.removeItem(CHECKOUT_VIEW_STORAGE_KEY);
-    } catch {}
+    } catch { }
     setView("plans");
   };
 
   const handleUpgradeSuccess = async () => {
     try {
       sessionStorage.removeItem(CHECKOUT_VIEW_STORAGE_KEY);
-    } catch {}
+    } catch { }
     setView("plans");
     try {
       if (typeof onSetPremium === "function") {
@@ -94,9 +94,8 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
 
   return (
     <div
-      className={`flex-1 min-h-0 h-full w-full bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans ${
-        view === "checkout" ? "overflow-hidden" : "overflow-y-auto"
-      }`}
+      className={`flex-1 min-h-0 h-full w-full bg-[#F0F8F6] text-[#0F172A] flex flex-col font-sans ${view === "checkout" ? "overflow-hidden" : "overflow-y-auto"
+        }`}
     >
       {/* Top Header */}
       <ScreenHeader
@@ -130,11 +129,10 @@ export default function PremiumScreen({ user, onBack, onSetPremium }) {
 
       {/* Main Container */}
       <main
-        className={`flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 ${
-          view === "checkout"
+        className={`flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 ${view === "checkout"
             ? "py-2 sm:py-3 flex flex-col justify-center max-h-full overflow-hidden"
             : "space-y-8 pb-24"
-        }`}
+          }`}
       >
         {view === "checkout" ? (
           /* ================= GIAO DIỆN THANH TOÁN VIETQR ================= */
