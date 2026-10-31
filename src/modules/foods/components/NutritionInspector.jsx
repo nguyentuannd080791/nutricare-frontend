@@ -252,6 +252,16 @@ function MicronutrientClinicalTable({ facts, detail }) {
   );
 }
 
+function isSafeExternalUrl(url) {
+  if (typeof url !== "string" || !url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Thanh tra dinh dưỡng & Cảnh báo y khoa Master-Detail (SOLID: Single Responsibility)
  * Đồng bộ từ test-ui (NutritionInspector) với khả năng tích hợp chi tiết API backend
@@ -377,12 +387,12 @@ export default function NutritionInspector({
         <MicronutrientClinicalTable facts={facts} detail={detail} />
 
         {/* 6. Ghi chú nguồn dữ liệu Viện Dinh Dưỡng Quốc Gia */}
-        {detail?.sourceUrl && (
+        {isSafeExternalUrl(detail?.sourceUrl) && (
           <div className="pt-2 text-center">
             <a
               href={detail.sourceUrl}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-[11px] text-[#059669] hover:underline font-semibold"
             >
               <span>Nguồn: Viện Dinh Dưỡng Quốc Gia (NIN)</span>

@@ -5,8 +5,9 @@
 // được lưu thẳng vào record. Việc này giữ đúng SRP: file này chỉ còn đúng 1
 // trách nhiệm là "nhật ký quét", không còn gánh thêm việc quản lý file.
 const INDEX_KEY = "nutricare:scan_records";
+const MAX_SCAN_HISTORY = 20;
 
-// Nhật ký quét lưu trên máy (chưa có bảng food_logs ở backend).
+// Nhật ký quét lưu trên máy (chỉ lưu metadata món ăn, không lưu base64 ảnh dung lượng lớn để tránh tràn hạn mức localStorage)
 export async function appendScanRecord(record) {
   let all = [];
   try {
@@ -15,9 +16,14 @@ export async function appendScanRecord(record) {
   } catch {
     all = [];
   }
+
+  // Tách bỏ chuỗi base64 photoUri nặng hàng megabyte để bảo vệ an toàn quota và tính riêng tư
+  const { photoUri: _ignoredPhoto, ...safeRecord } = record;
+
   try {
-    window.localStorage.setItem(INDEX_KEY, JSON.stringify([record, ...all]));
+    const pruned = [safeRecord, ...all].slice(0, MAX_SCAN_HISTORY);
+    window.localStorage.setItem(INDEX_KEY, JSON.stringify(pruned));
   } catch (e) {
-    console.error("[NutriCare] Lưu nhật ký quét thất bại:", e);
+    console.warn("[NutriCare] Không thể lưu nhật ký quét vào localStorage (hạn mức đầy):", e);
   }
 }

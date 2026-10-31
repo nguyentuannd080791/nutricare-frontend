@@ -22,22 +22,24 @@ import PresetCatalogDropdown from "../components/PresetCatalogDropdown";
 import ConditionEditModal from "../components/ConditionEditModal";
 import { ScreenHeader } from "../../../shared/components/ui";
 
-const CONDITION_NOTES_KEY = "nutricare_condition_notes_v1";
+const CONDITION_NOTES_KEY_PREFIX = "nutricare_condition_notes_";
 
-function getLocalNotes() {
+function getLocalNotes(userId) {
   try {
-    const raw = localStorage.getItem(CONDITION_NOTES_KEY);
+    const key = `${CONDITION_NOTES_KEY_PREFIX}${userId || "guest"}`;
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 }
 
-function saveLocalNote(conditionName, note) {
+function saveLocalNote(userId, conditionName, note) {
   try {
-    const current = getLocalNotes();
+    const key = `${CONDITION_NOTES_KEY_PREFIX}${userId || "guest"}`;
+    const current = getLocalNotes(userId);
     current[conditionName] = note;
-    localStorage.setItem(CONDITION_NOTES_KEY, JSON.stringify(current));
+    localStorage.setItem(key, JSON.stringify(current));
   } catch {
     // Ignore storage quota
   }
@@ -59,8 +61,15 @@ export default function ConditionsScreen({
   onSave,
   onDelete,
 }) {
+  const userId = data?.user?.id || data?.id || "";
   const rawConditions = useMemo(() => data?.conditions || [], [data?.conditions]);
-  const [localNotes, setLocalNotes] = useState(getLocalNotes);
+  const [prevUserId, setPrevUserId] = useState(userId);
+  const [localNotes, setLocalNotes] = useState(() => getLocalNotes(userId));
+
+  if (prevUserId !== userId) {
+    setPrevUserId(userId);
+    setLocalNotes(getLocalNotes(userId));
+  }
 
   // Làm giàu dữ liệu điều kiện từ backend bằng cơ sở tri thức y khoa và ghi chú cá nhân
   const conditions = useMemo(() => {
@@ -108,7 +117,7 @@ export default function ConditionsScreen({
 
     // Lưu ghi chú vào local store nếu có
     if (recog?.notes) {
-      saveLocalNote(canonicalName, recog.notes);
+      saveLocalNote(userId, canonicalName, recog.notes);
       setLocalNotes((prev) => ({ ...prev, [canonicalName]: recog.notes }));
     }
 
@@ -120,7 +129,7 @@ export default function ConditionsScreen({
   // Chọn từ danh mục mẫu chuẩn có sẵn
   const handleSelectFromPreset = (preset) => {
     if (preset.notes) {
-      saveLocalNote(preset.name, preset.notes);
+      saveLocalNote(userId, preset.name, preset.notes);
       setLocalNotes((prev) => ({ ...prev, [preset.name]: preset.notes }));
     }
 
@@ -132,7 +141,7 @@ export default function ConditionsScreen({
   // Cập nhật điều kiện
   const handleUpdateCondition = (updated) => {
     if (updated.notes) {
-      saveLocalNote(updated.name, updated.notes);
+      saveLocalNote(userId, updated.name, updated.notes);
       setLocalNotes((prev) => ({ ...prev, [updated.name]: updated.notes }));
     }
 
